@@ -115,9 +115,18 @@ if (($handle = fopen($csvFile, 'r')) !== FALSE) {
     <title>CSV User Manager</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #fff; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        /* separate borders are required for position:sticky on <th> to work */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 20px; background: #fff; }
+        th, td { border-bottom: 1px solid #ccc; border-right: 1px solid #ccc; padding: 8px; text-align: left; }
+        th:first-child, td:first-child { border-left: 1px solid #ccc; }
+        thead th {
+            border-top: 1px solid #ccc;
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
         input[type="text"], input[type="email"], select { width: 100%; box-sizing: border-box; padding: 4px; }
         .btn-submit { padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer; font-size: 14px; border-radius: 4px; }
         .btn-submit:hover { background-color: #0056b3; }
@@ -211,5 +220,8 @@ if (($handle = fopen($csvFile, 'r')) !== FALSE) {
                 ?>
             </tbody>
         </table>
-
+        <button type="submit" class="btn-submit">Save Changes</button>
+    </form>
+</body>
+</html>
 
