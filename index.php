@@ -207,7 +207,7 @@ if (!$reloadFromPost) {
     <meta charset="UTF-8">
     <title>CSV User Manager</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+        body { font-family: Arial, sans-serif; margin: 20px; padding-bottom: 80px; background-color: #f9f9f9; }
         /* separate borders are required for position:sticky on <th> to work */
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 20px; background: #fff; }
         th, td { border-bottom: 1px solid #ccc; border-right: 1px solid #ccc; padding: 8px; text-align: left; }
@@ -221,7 +221,22 @@ if (!$reloadFromPost) {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
         }
         input[type="text"], input[type="email"], select { width: 100%; box-sizing: border-box; padding: 4px; }
-        .btn-submit { padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer; font-size: 14px; border-radius: 4px; }
+        .save-float {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 20;
+        }
+        .btn-submit {
+            padding: 12px 24px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
         .btn-submit:hover { background-color: #0056b3; }
         .delete-col { text-align: center; width: 60px; }
         .new-user-header { padding: 10px; font-weight: bold; background: #dcdcdc; color: #333; }
@@ -316,7 +331,9 @@ if (!$reloadFromPost) {
                 ?>
             </tbody>
         </table>
-        <button type="submit" class="btn-submit">Save Changes</button>
+        <div class="save-float">
+            <button type="submit" class="btn-submit">Save Changes</button>
+        </div>
     </form>
 </body>
 </html>
