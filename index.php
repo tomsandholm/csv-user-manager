@@ -32,6 +32,36 @@ function collect_hosts($users) {
     return $hosts;
 }
 
+function column_values($rows, $key) {
+    $values = [];
+    foreach ($rows as $row) {
+        $values[] = $row[$key] ?? '';
+    }
+    return $values;
+}
+
+// Next unused numeric id: one past the highest already used, skipping any collisions
+function next_unused_id($usedValues, $start = 1001) {
+    $used = [];
+    $max = $start - 1;
+    foreach ($usedValues as $value) {
+        $value = trim_value($value);
+        if ($value === '' || !ctype_digit($value)) {
+            continue;
+        }
+        $number = (int)$value;
+        $used[$number] = true;
+        if ($number > $max) {
+            $max = $number;
+        }
+    }
+    $next = $max + 1;
+    while (isset($used[$next])) {
+        $next++;
+    }
+    return (string)$next;
+}
+
 // username, uid, and gid must be present and unique among rows that will be saved
 function identity_errors($rows) {
     $errors = [];
@@ -109,12 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postedNewUser = is_array($_POST['new_user'] ?? null) ? $_POST['new_user'] : [];
     $newUserForm = array_merge($newUserForm, $postedNewUser);
 
-    // 1. Process "Add New User" row FIRST if the username field is filled out
-    if (trim_value($newUserForm['username']) !== '') {
-        $updatedRows[] = row_from_post($newUserForm);
-    }
-
-    // 2. Process existing users and check for deletion tags
+    // 1. Process existing users and check for deletion tags
     $postedExisting = [];
     if (isset($_POST['users']) && is_array($_POST['users'])) {
         foreach ($_POST['users'] as $index => $userData) {
@@ -127,6 +152,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updatedRows[] = $row;
             $postedExisting[] = array_combine($headers, $row);
         }
+    }
+
+    // 2. Process "Add New User" row if the username field is filled out
+    if (trim_value($newUserForm['username']) !== '') {
+        $newRow = row_from_post($newUserForm);
+        if ($newRow[1] === '') {
+            $newRow[1] = next_unused_id(column_values($updatedRows, 1));
+        }
+        if ($newRow[2] === '') {
+            $newRow[2] = next_unused_id(column_values($updatedRows, 2));
+        }
+        $newUserForm['uid'] = $newRow[1];
+        $newUserForm['gid'] = $newRow[2];
+        array_unshift($updatedRows, $newRow);
     }
 
     list($identityErrors, $invalidFields) = identity_errors($updatedRows);
@@ -199,6 +238,13 @@ if (!$reloadFromPost) {
         fclose($handle);
     }
     $hosts = collect_hosts($users);
+}
+
+if (trim_value($newUserForm['uid']) === '') {
+    $newUserForm['uid'] = next_unused_id(column_values($users, 'uid'));
+}
+if (trim_value($newUserForm['gid']) === '') {
+    $newUserForm['gid'] = next_unused_id(column_values($users, 'gid'));
 }
 ?>
 <!DOCTYPE html>
@@ -274,8 +320,8 @@ if (!$reloadFromPost) {
                 </tr>
                 <tr class="new-user-row">
                     <td><input type="text" name="new_user[username]" placeholder="e.g. bsmith" value="<?php echo htmlspecialchars($newUserForm['username']); ?>"<?php echo field_error_class($invalidFields, 'username', $newUserForm['username']); ?>></td>
-                    <td><input type="text" name="new_user[uid]" placeholder="1003" value="<?php echo htmlspecialchars($newUserForm['uid']); ?>"<?php echo field_error_class($invalidFields, 'uid', $newUserForm['uid']); ?>></td>
-                    <td><input type="text" name="new_user[gid]" placeholder="1003" value="<?php echo htmlspecialchars($newUserForm['gid']); ?>"<?php echo field_error_class($invalidFields, 'gid', $newUserForm['gid']); ?>></td>
+                    <td><input type="text" name="new_user[uid]" placeholder="<?php echo htmlspecialchars($newUserForm['uid']); ?>" value="<?php echo htmlspecialchars($newUserForm['uid']); ?>"<?php echo field_error_class($invalidFields, 'uid', $newUserForm['uid']); ?>></td>
+                    <td><input type="text" name="new_user[gid]" placeholder="<?php echo htmlspecialchars($newUserForm['gid']); ?>" value="<?php echo htmlspecialchars($newUserForm['gid']); ?>"<?php echo field_error_class($invalidFields, 'gid', $newUserForm['gid']); ?>></td>
                     <td><input type="email" name="new_user[email]" placeholder="bsmith@example.com" value="<?php echo htmlspecialchars($newUserForm['email']); ?>"></td>
                     <td><input type="text" name="new_user[home-directory]" placeholder="/home/bsmith" value="<?php echo htmlspecialchars($newUserForm['home-directory']); ?>"></td>
                     <td><input type="text" name="new_user[public-key]" placeholder="ssh-rsa ..." value="<?php echo htmlspecialchars($newUserForm['public-key']); ?>"></td>
