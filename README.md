@@ -1,69 +1,115 @@
 # CSV User Manager
 
-A single PHP page that edits `users.csv` through a web form. Open it in a browser, change the table, and click **Save Changes** to rewrite the CSV.
+A small PHP web dashboard for managing users and hosts stored in CSV files. The application provides an authenticated interface for creating, editing, and deleting user records and host records, and keeps host membership lists synchronized with user authorized-host mappings.
 
 ## Files
 
 | File | Role |
 | --- | --- |
-| `index.php` | Reads and writes `users.csv`; renders the editor |
-| `users.csv` | User records (created with sample rows if missing) |
-| `Makefile` | Copies both files to `/var/www/html` |
+| `index.php` | Application controller: starts the session, handles login/logout, reads and writes both CSV files, synchronizes host memberships, and loads the dashboard |
+| `view.php` | HTML dashboard template included by `index.php`; contains the login form and authenticated users/hosts management interface |
+| `users.csv` | User records |
+| `hosts.csv` | Host records and calculated comma-separated member lists |
+| `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
 
-## CSV format
+## Authentication
 
-Each row is one user. The first line is the header:
+The dashboard requires an authenticated session before either CSV database is displayed or modified.
+
+The current credentials defined in `index.php` are:
+
+```text
+Username: admin
+Password: secret123
+```
+
+Change `ADMIN_USER` and `ADMIN_PASS` in `index.php` before deploying to a shared or production environment. Use the **Logout** link in the dashboard to end the session.
+
+## CSV formats
+
+### `users.csv`
+
+Each row represents one user:
 
 ```text
 username,uid,gid,email,home-directory,public-key,authorized-host
 ```
 
-`index.php` always writes those seven columns, in that order.
+Example:
 
-**Username**, **uid**, and **gid** must each be unique across every row that will be saved. UID and GID are assigned independently (two users may not share a uid, even if their gids differ).
+```csv
+username,uid,gid,email,home-directory,public-key,authorized-host
+tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,ssh-rsa AAA...,*
+kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,*
+mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2.tsand.org
+```
 
-## How `index.php` works
+The `authorized-host` value may be `*` to represent all hosts, or a specific FQDN from `hosts.csv`.
 
-Every request does the same three things: optionally seed the CSV, optionally save a POST, then render the current file.
+### `hosts.csv`
 
-1. **Seed.** If `users.csv` does not exist, the script creates it with the header row and two sample users (`jdoe`, `asmith`).
+Each row represents a managed host:
 
-2. **Save (POST only).** The form posts two groups of fields:
-   - `new_user[...]` — the blue “Add New User” row at the top. If **Username** is filled in, that row is written first.
-   - `users[i][...]` — every existing row. Checking **Delete** drops that row from the rewrite.
+```text
+fqdn,group-id,member-list
+```
 
-   If the new user’s uid or gid is left blank, the script fills in the next unused numeric value: one past the highest already used among the rows being kept (skipping any collision). You can still type your own values.
+Example:
 
-   Before writing, the script checks that every kept row has a username, uid, and gid, and that those three fields are unique. On failure the CSV is left unchanged, colliding fields are highlighted, and the form keeps your edits so you can fix them.
+```csv
+fqdn,group-id,member-list
+tom1.tsand.org,5000,"tsandholm,ansible,mary"
+tom2.tsand.org,5001,"tsandholm,ansible,mike"
+tom3.tsand.org,5002,"tsandholm,ansible,iggy"
+```
 
-   On success the file is replaced in one pass: exclusive `flock`, truncate, write the header, write the kept rows, flush, unlock. New users therefore appear at the top of the CSV on the next load.
+`member-list` is recalculated from `users.csv` whenever a user is saved or deleted, and whenever a host is saved. Users assigned to `*` are included on every managed host; users assigned to a specific FQDN are included only on that host. Duplicate member names are removed and the resulting list is sorted.
 
-3. **Render.** The script opens the CSV with a shared lock, skips the header, and builds two lists:
-   - `$users` — every data row
-   - `$hosts` — `all` and `none`, plus every distinct `authorized-host` value already in the file
+## Dashboard features
 
-   Those feed the HTML table. Authorized Host is a `<select>` (new users default to `all`). Existing rows are editable inputs. The Add New User uid and gid fields are prefilled with the next unused IDs.
+- Add, edit, and delete users from the **Users List** panel
+- Add, edit, and delete hosts from the **Hosts List** panel
+- Edit user identity, contact, SSH key, home directory, and authorized host fields
+- Edit host FQDN and group ID fields
+- Display calculated host member lists
+- Synchronize host memberships after user changes
+- Create empty `users.csv` and `hosts.csv` files automatically if they are missing
+- Escape displayed CSV values with `htmlspecialchars`
 
-   Column headers stay pinned to the top of the viewport while you scroll. **Save Changes** stays in the bottom-right corner so you can save without scrolling to the end of the table.
+The user and host forms use browser-level required-field validation. The current PHP handlers write submitted rows directly and do not enforce uniqueness or additional server-side validation, so CSV content should be reviewed before production use.
 
-Short rows are padded to seven fields. Output is escaped with `htmlspecialchars`.
+## Quick Start
 
-## Using the page
+1. Make sure PHP is installed.
+2. From this directory, start PHP's development server:
 
-- **Add** a user: fill the top row (username is required). UID and GID are filled in for you; change them if you need to, then save.
-- **Edit** a user: change any field in an existing row and save.
-- **Delete** a user: check **Delete** on that row and save.
+   ```sh
+   php -S 127.0.0.1:8000
+   ```
 
-A save that would duplicate a username, uid, or gid is rejected and the CSV is not written.
+3. Open `http://127.0.0.1:8000/index.php`.
+4. Sign in with the configured credentials.
+5. Use the left panel to manage users and the right panel to manage hosts.
 
-The web server user must be able to read and write `users.csv` in the same directory as `index.php`.
+If either CSV file is missing, `index.php` creates an empty file before loading the dashboard. Add the desired header row and records through the application or prepare the files beforehand.
 
 ## Deploy
 
-Requires PHP (for example Apache with `mod_php` or PHP-FPM). From this directory:
+Requires PHP, for example Apache with `mod_php` or PHP-FPM. The web server user must be able to read and write `index.php`, `view.php`, `users.csv`, and `hosts.csv`.
+
+From this directory:
 
 ```sh
 make push
 ```
 
-That copies `index.php` and `users.csv` to `/var/www/html`. Then open the page on the web server.
+The target copies all four application files into `/var/www/html`:
+
+```sh
+sudo cp index.php /var/www/html
+sudo cp view.php /var/www/html
+sudo cp users.csv /var/www/html
+sudo cp hosts.csv /var/www/html
+```
+
+Then open `index.php` through the web server and sign in.
