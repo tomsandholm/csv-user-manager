@@ -48,6 +48,30 @@ function write_csv($file, $rows) {
     return false;
 }
 
+// Return the next integer after the highest numeric value in a users.csv column.
+function next_user_id($rows, $column) {
+    $highest = 0;
+    foreach ($rows as $row) {
+        $value = trim($row[$column] ?? '');
+        if (ctype_digit($value)) {
+            $highest = max($highest, (int)$value);
+        }
+    }
+    return (string)($highest + 1);
+}
+
+// Return the next group ID after the highest numeric value in hosts.csv.
+function next_host_group_id($rows) {
+    $highest = 4999;
+    foreach ($rows as $row) {
+        $value = trim($row[1] ?? '');
+        if (ctype_digit($value)) {
+            $highest = max($highest, (int)$value);
+        }
+    }
+    return (string)($highest + 1);
+}
+
 // Recalculate each host's member list from the current user authorized-host mappings.
 function sync_hosts_members($csv_users, $csv_hosts) {
     $users = read_csv($csv_users, 7);
@@ -112,6 +136,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
                 trim($_POST['email'] ?? ''), trim($_POST['home-directory'] ?? ''), 
                 trim($_POST['public-key'] ?? ''), trim($_POST['authorized-host'] ?? '')
             ];
+            if ($row_index < 0) {
+                if ($submitted_row[1] === '') {
+                    $submitted_row[1] = next_user_id($current_data, 1);
+                }
+                if ($submitted_row[2] === '') {
+                    $submitted_row[2] = next_user_id($current_data, 2);
+                }
+            }
             if ($row_index >= 0) { $current_data[$row_index] = $submitted_row; } else { $current_data[] = $submitted_row; }
             if (write_csv($csv_users, $current_data)) {
                 sync_hosts_members($csv_users, $csv_hosts);
@@ -134,6 +166,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
                 trim($_POST['group-id'] ?? ''), 
                 trim($_POST['member-list'] ?? '')
             ];
+            if ($row_index < 0 && $submitted_row[1] === '') {
+                $submitted_row[1] = next_host_group_id($current_data);
+            }
             if ($row_index >= 0) { $current_data[$row_index] = $submitted_row; } else { $current_data[] = $submitted_row; }
             if (write_csv($csv_hosts, $current_data)) {
                 sync_hosts_members($csv_users, $csv_hosts);
@@ -151,6 +186,11 @@ $hosts = read_csv($csv_hosts, 3);
 // Resolve the row being edited, if the request came from an Edit action.
 $edit_user = ($target_db === 'users' && $action === 'edit' && $row_index >= 0 && isset($users[$row_index])) ? $users[$row_index] : null;
 $edit_host = ($target_db === 'hosts' && $action === 'edit' && $row_index >= 0 && isset($hosts[$row_index])) ? $hosts[$row_index] : null;
+
+// New-user fields default to the next values after the current users.csv contents.
+$next_uid = next_user_id($users, 1);
+$next_gid = next_user_id($users, 2);
+$next_group_id = next_host_group_id($hosts);
 
 // Render the login form or authenticated dashboard.
 include 'view.php';

@@ -46,6 +46,8 @@ mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2.tsand
 
 The `authorized-host` value may be `*` to represent all hosts, or a specific FQDN from `hosts.csv`.
 
+When adding a user, the form defaults UID and GID to one higher than the highest numeric value currently assigned in `users.csv`. If either value is omitted from the submitted request, `index.php` applies the same calculation server-side. Editing an existing user preserves its current UID and GID unless they are changed explicitly.
+
 ### `hosts.csv`
 
 Each row represents a managed host:
@@ -65,6 +67,8 @@ tom3.tsand.org,5002,"tsandholm,ansible,iggy"
 
 `member-list` is recalculated from `users.csv` whenever a user is saved or deleted, and whenever a host is saved. Users assigned to `*` are included on every managed host; users assigned to a specific FQDN are included only on that host. Duplicate member names are removed and the resulting list is sorted.
 
+When adding a host, the form defaults Group ID to the next value after the highest numeric `group-id` already assigned in `hosts.csv`. Group IDs start at `5000` when no numeric IDs exist, and the server applies the same fallback when a new host submission leaves the field blank. Editing an existing host preserves its current Group ID unless it is changed explicitly.
+
 ## Dashboard features
 
 - Add, edit, and delete users from the **Users List** panel
@@ -73,6 +77,8 @@ tom3.tsand.org,5002,"tsandholm,ansible,iggy"
 - Edit host FQDN and group ID fields
 - Display calculated host member lists
 - Synchronize host memberships after user changes
+- Suggest the next available UID and GID for new users
+- Suggest the next available Group ID for new hosts, starting at `5000`
 - Create empty `users.csv` and `hosts.csv` files automatically if they are missing
 - Escape displayed CSV values with `htmlspecialchars`
 

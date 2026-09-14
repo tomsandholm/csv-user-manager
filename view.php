@@ -53,8 +53,8 @@
                         <input type="hidden" name="index" value="<?php echo $edit_user ? $row_index : -1; ?>">
                         <div class="form-row"><label>Username</label><input type="text" name="username" value="<?php echo htmlspecialchars($edit_user[0] ?? ''); ?>" required></div>
                         <div class="form-row"><label>Email</label><input type="email" name="email" value="<?php echo htmlspecialchars($edit_user[3] ?? ''); ?>" required></div>
-                        <div class="form-row"><label>UID</label><input type="number" name="uid" value="<?php echo htmlspecialchars($edit_user[1] ?? ''); ?>" required></div>
-                        <div class="form-row"><label>GID</label><input type="number" name="gid" value="<?php echo htmlspecialchars($edit_user[2] ?? ''); ?>" required></div>
+                        <div class="form-row"><label>UID</label><input type="number" name="uid" value="<?php echo htmlspecialchars($edit_user ? $edit_user[1] : $next_uid); ?>" required></div>
+                        <div class="form-row"><label>GID</label><input type="number" name="gid" value="<?php echo htmlspecialchars($edit_user ? $edit_user[2] : $next_gid); ?>" required></div>
                         <div class="form-row"><label>Home Directory</label><input type="text" name="home-directory" value="<?php echo htmlspecialchars($edit_user[4] ?? ''); ?>" required></div>
                         <div class="form-row" style="align-items:flex-start;"><label>Public Key</label><textarea name="public-key" rows="3" style="font-family:monospace;" required><?php echo htmlspecialchars($edit_user[5] ?? ''); ?></textarea></div>
                         
@@ -118,7 +118,7 @@
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="index" value="<?php echo $edit_host ? $row_index : -1; ?>">
                         <div class="form-row"><label>FQDN</label><input type="text" name="fqdn" value="<?php echo htmlspecialchars($edit_host[0] ?? ''); ?>" placeholder="e.g. host.domain.com" required></div>
-                        <div class="form-row"><label>Group ID</label><input type="number" name="group-id" min="5000" value="<?php echo htmlspecialchars($edit_host[1] ?? '5000'); ?>" required></div>
+                        <div class="form-row"><label>Group ID</label><input type="number" name="group-id" min="5000" value="<?php echo htmlspecialchars($edit_host ? $edit_host[1] : $next_group_id); ?>" required></div>
                         <div class="form-row"><label>Member List</label><input type="text" name="member-list" value="<?php echo htmlspecialchars($edit_host[2] ?? ''); ?>" placeholder="Auto-calculated from users" readonly style="background:#e9ecef; cursor:not-allowed;"></div>
                         <div style="margin-left:140px; margin-top:10px;">
                             <button type="submit" class="btn-sub" style="background:#2e59d9;">Save Host</button>
