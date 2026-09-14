@@ -1,50 +1,6 @@
 username,uid,gid,email,home-directory,public-key,authorized-host
-stu01,3001,3001,stu01@example.com,/home/stu01,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu02,3002,3002,stu02@example.com,/home/stu02,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu03,3003,3003,stu03@example.com,/home/stu03,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu04,3004,3004,stu04@example.com,/home/stu04,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu05,3005,3005,stu05@example.com,/home/stu05,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu06,3006,3006,stu06@example.com,/home/stu06,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu07,3007,3007,stu07@example.com,/home/stu07,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu08,3008,3008,stu08@example.com,/home/stu08,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu09,3009,3009,stu09@example.com,/home/stu09,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu10,3010,3010,stu10@example.com,/home/stu10,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu11,3011,3011,stu11@example.com,/home/stu11,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu12,3012,3012,stu12@example.com,/home/stu12,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu13,3013,3013,stu13@example.com,/home/stu13,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu14,3014,3014,stu14@example.com,/home/stu14,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu15,3015,3015,stu15@example.com,/home/stu15,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu16,3016,3016,stu16@example.com,/home/stu16,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu17,3017,3017,stu17@example.com,/home/stu17,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu18,3018,3018,stu18@example.com,/home/stu18,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu19,3019,3019,stu19@example.com,/home/stu19,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu20,3020,3020,stu20@example.com,/home/stu20,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu21,3021,3021,stu21@example.com,/home/stu21,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu22,3022,3022,stu22@example.com,/home/stu22,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu23,3023,3023,stu23@example.com,/home/stu23,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu24,3024,3024,stu24@example.com,/home/stu24,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu25,3025,3025,stu25@example.com,/home/stu25,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu26,3026,3026,stu26@example.com,/home/stu26,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu27,3027,3027,stu27@example.com,/home/stu27,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu28,3028,3028,stu28@example.com,/home/stu28,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu29,3029,3029,stu29@example.com,/home/stu29,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu30,3030,3030,stu30@example.com,/home/stu30,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu31,3031,3031,stu31@example.com,/home/stu31,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu32,3032,3032,stu32@example.com,/home/stu32,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu33,3033,3033,stu33@example.com,/home/stu33,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu34,3034,3034,stu34@example.com,/home/stu34,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu35,3035,3035,stu35@example.com,/home/stu35,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu36,3036,3036,stu36@example.com,/home/stu36,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu37,3037,3037,stu37@example.com,/home/stu37,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu38,3038,3038,stu38@example.com,/home/stu38,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu39,3039,3039,stu39@example.com,/home/stu39,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu40,3040,3040,stu40@example.com,/home/stu40,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu41,3041,3041,stu41@example.com,/home/stu41,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu42,3042,3042,stu42@example.com,/home/stu42,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu43,3043,3043,stu43@example.com,/home/stu43,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu44,3044,3044,stu44@example.com,/home/stu44,"ssh-rsa AAAAB3N...example",tom5.tsand.org
-stu45,3045,3045,stu45@example.com,/home/stu45,"ssh-rsa AAAAB3N...example",tom1.tsand.org
-stu46,3046,3046,stu46@example.com,/home/stu46,"ssh-rsa AAAAB3N...example",tom2.tsand.org
-stu47,3047,3047,stu47@example.com,/home/stu47,"ssh-rsa AAAAB3N...example",tom3.tsand.org
-stu48,3048,3048,stu48@example.com,/home/stu48,"ssh-rsa AAAAB3N...example",tom4.tsand.org
-stu49,3049,3049,stu49@example.com,/home/stu49,"ssh-rsa AAAAB3N...example",tom5.tsand.org
+tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKqXZ+SLI5aH0aYMfoIygApu28cmVH06GU91Ko6hpfBblNntam4Mi6tWolCeZLeaDmZ+/LdXWykbmOyoKq42S2SStjimkeUTqQWHt6wojPfIZwovk7zN5Vn7V8w54e0/v97fX/j9gCvDToHzx6ReJyR5uRoMJ9Cs82DlJwOE6sVpbOPnpYwlCCB7zZmi82RiXZ7pVO6C3ezcJvl3565gxqHbmcqK5uDbXx2mTFC08TUxyxWOfEeAJbhM5RD7OtmbYTL59HlzuhPhgG8jCSUq5nJvOKqhqNvDF0MzVbV2hxmiJsfvQ84fxvCTh4CWOGxUMzEv57uLdTgQeXm1Gl01FNUIPvwPaRVYUzPXyFzPrXkN19f7fTJ6pCJpw/4O35RGIL57fK4jYV0y0xPrDtRESiwColvqubIi27NAqGJwAwJzNNe696COoj8ORsEMxn5uwB68xMALK6IIJZcTk4FO13JQqD/hlIb8+JkkmqToTFmymbjPiTTiIKA6soWOxeteM= sandholm@beast4",*
+kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKqXZ+SLI5aH0aYMfoIygApu28cmVH06GU91Ko6hpfBblNntam4Mi6tWolCeZLeaDmZ+/LdXWykbmOyoKq42S2SStjimkeUTqQWHt6wojPfIZwovk7zN5Vn7V8w54e0/v97fX/j9gCvDToHzx6ReJyR5uRoMJ9Cs82DlJwOE6sVpbOPnpYwlCCB7zZmi82RiXZ7pVO6C3ezcJvl3565gxqHbmcqK5uDbXx2mTFC08TUxyxWOfEeAJbhM5RD7OtmbYTL59HlzuhPhgG8jCSUq5nJvOKqhqNvDF0MzVbV2hxmiJsfvQ84fxvCTh4CWOGxUMzEv57uLdTgQeXm1Gl01FNUIPvwPaRVYUzPXyFzPrXkN19f7fTJ6pCJpw/4O35RGIL57fK4jYV0y0xPrDtRESiwColvqubIi27NAqGJwAwJzNNe696COoj8ORsEMxn5uwB68xMALK6IIJZcTk4FO13JQqD/hlIb8+JkkmqToTFmymbjPiTTiIKA6soWOxeteM= sandholm@beast4",*
+mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKqXZ+SLI5aH0aYMfoIygApu28cmVH06GU91Ko6hpfBblNntam4Mi6tWolCeZLeaDmZ+/LdXWykbmOyoKq42S2SStjimkeUTqQWHt6wojPfIZwovk7zN5Vn7V8w54e0/v97fX/j9gCvDToHzx6ReJyR5uRoMJ9Cs82DlJwOE6sVpbOPnpYwlCCB7zZmi82RiXZ7pVO6C3ezcJvl3565gxqHbmcqK5uDbXx2mTFC08TUxyxWOfEeAJbhM5RD7OtmbYTL59HlzuhPhgG8jCSUq5nJvOKqhqNvDF0MzVbV2hxmiJsfvQ84fxvCTh4CWOGxUMzEv57uLdTgQeXm1Gl01FNUIPvwPaRVYUzPXyFzPrXkN19f7fTJ6pCJpw/4O35RGIL57fK4jYV0y0xPrDtRESiwColvqubIi27NAqGJwAwJzNNe696COoj8ORsEMxn5uwB68xMALK6IIJZcTk4FO13JQqD/hlIb8+JkkmqToTFmymbjPiTTiIKA6soWOxeteM= sandholm@beast4",tom2.tsand.org
+mikey,3003,3003,tom.sandholm@gmail.com,/share/home/mikey,"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKqXZ+SLI5aH0aYMfoIygApu28cmVH06GU91Ko6hpfBblNntam4Mi6tWolCeZLeaDmZ+/LdXWykbmOyoKq42S2SStjimkeUTqQWHt6wojPfIZwovk7zN5Vn7V8w54e0/v97fX/j9gCvDToHzx6ReJyR5uRoMJ9Cs82DlJwOE6sVpbOPnpYwlCCB7zZmi82RiXZ7pVO6C3ezcJvl3565gxqHbmcqK5uDbXx2mTFC08TUxyxWOfEeAJbhM5RD7OtmbYTL59HlzuhPhgG8jCSUq5nJvOKqhqNvDF0MzVbV2hxmiJsfvQ84fxvCTh4CWOGxUMzEv57uLdTgQeXm1Gl01FNUIPvwPaRVYUzPXyFzPrXkN19f7fTJ6pCJpw/4O35RGIL57fK4jYV0y0xPrDtRESiwColvqubIi27NAqGJwAwJzNNe696COoj8ORsEMxn5uwB68xMALK6IIJZcTk4FO13JQqD/hlIb8+JkkmqToTFmymbjPiTTiIKA6soWOxeteM= sandholm@beast4",tom2.tsand.org
+iggy,3004,3004,tom.sandholm@gmail.com,/share/home/iggy,"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKqXZ+SLI5aH0aYMfoIygApu28cmVH06GU91Ko6hpfBblNntam4Mi6tWolCeZLeaDmZ+/LdXWykbmOyoKq42S2SStjimkeUTqQWHt6wojPfIZwovk7zN5Vn7V8w54e0/v97fX/j9gCvDToHzx6ReJyR5uRoMJ9Cs82DlJwOE6sVpbOPnpYwlCCB7zZmi82RiXZ7pVO6C3ezcJvl3565gxqHbmcqK5uDbXx2mTFC08TUxyxWOfEeAJbhM5RD7OtmbYTL59HlzuhPhgG8jCSUq5nJvOKqhqNvDF0MzVbV2hxmiJsfvQ84fxvCTh4CWOGxUMzEv57uLdTgQeXm1Gl01FNUIPvwPaRVYUzPXyFzPrXkN19f7fTJ6pCJpw/4O35RGIL57fK4jYV0y0xPrDtRESiwColvqubIi27NAqGJwAwJzNNe696COoj8ORsEMxn5uwB68xMALK6IIJZcTk4FO13JQqD/hlIb8+JkkmqToTFmymbjPiTTiIKA6soWOxeteM= sandholm@beast4",tom3.tsand.org
