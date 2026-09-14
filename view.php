@@ -21,6 +21,7 @@
     </style>
 </head>
 <body>
+<!-- Show the login form until index.php confirms an authenticated session. -->
 <?php if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true): ?>
     <div class="box">
         <h2 style="margin:0 0 10px 0; text-align:center;">Admin Login</h2>
@@ -32,6 +33,7 @@
         </form>
     </div>
 <?php else: ?>
+    <!-- Authenticated users get a two-column dashboard for users and hosts. -->
     <div class="nav">
         <h2 style="margin:0; font-size:18px;">System Infrastructure Database Dashboard</h2>
         <a href="index.php?action=logout" style="background:#dc3545; color:#fff; padding:6px 12px; text-decoration:none; border-radius:4px; font-weight:bold; font-size:13px;">Logout</a>
@@ -40,11 +42,12 @@
         <?php echo $message; ?>
         
         <div class="panels-split">
-            <!-- LEFT PANEL: USERS MANAGEMENT ENGINE -->
+            <!-- User management: the form supports both adding and editing rows. -->
             <div>
                 <div class="form-card">
                     <h3 style="margin:0 0 15px 0; color:#4e73df; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_user ? '📝 Edit User' : '➕ Add User'; ?></h3>
                     <form method="POST">
+                        <!-- These fields tell index.php which CSV and row to update. -->
                         <input type="hidden" name="target_db" value="users">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="index" value="<?php echo $edit_user ? $row_index : -1; ?>">
@@ -80,6 +83,7 @@
                     </form>
                 </div>
                 <h3>Users List (users.csv)</h3>
+                <!-- Existing users are displayed with edit and delete actions. -->
                 <table>
                     <thead><tr><th>User</th><th>UID/GID</th><th>Email</th><th>Public Key</th><th>Auth Host</th><th>Actions</th></tr></thead>
                     <tbody>
@@ -104,11 +108,12 @@
                 </table>
             </div>
 
-            <!-- RIGHT PANEL: HOSTS MANAGEMENT ENGINE -->
+            <!-- Host management: member-list is displayed but calculated by index.php. -->
             <div>
                 <div class="form-card">
                     <h3 style="margin:0 0 15px 0; color:#2e59d9; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_host ? '📝 Edit Host' : '➕ Add New Host'; ?></h3>
                     <form method="POST">
+                        <!-- These fields tell index.php which CSV and row to update. -->
                         <input type="hidden" name="target_db" value="hosts">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="index" value="<?php echo $edit_host ? $row_index : -1; ?>">
@@ -122,6 +127,7 @@
                     </form>
                 </div>
                 <h3>Hosts List (hosts.csv)</h3>
+                <!-- Existing hosts are displayed with edit and delete actions. -->
                 <table>
                     <thead><tr><th>FQDN</th><th>Group ID</th><th>Members</th><th>Actions</th></tr></thead>
                     <tbody>
