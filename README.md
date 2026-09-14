@@ -1,62 +1,112 @@
 # CSV User Manager
 
-A single PHP page that edits `users.csv` through a web form. Open it in a browser, change the table, and click **Save Changes** to rewrite the CSV.
+A small PHP web app for managing a CSV-backed user directory. It lets you add, edit, and delete Linux-style user entries from a browser while validating required identifiers before writing back to disk.
 
 ## Files
 
 | File | Role |
 | --- | --- |
-| `index.php` | Reads and writes `users.csv`; renders the editor |
-| `users.csv` | User records (created with sample rows if missing) |
-| `Makefile` | Copies both files to `/var/www/html` |
+| `index.php` | Main PHP page that reads `users.csv`, renders the editable table, validates changes, and writes the CSV back safely |
+| `users.csv` | Current user records; created automatically with sample rows if missing |
+| `Makefile` | Copies the app files into `/var/www/html` |
 
 ## CSV format
 
-Each row is one user. The first line is the header:
+Each row represents one user. The header is always:
 
 ```text
 username,uid,gid,email,home-directory,public-key,authorized-host
 ```
 
-`index.php` always writes those seven columns, in that order.
+The app writes those seven columns in that exact order. A row is considered valid only when:
 
-**Username**, **uid**, and **gid** must each be unique across every row that will be saved. UID and GID are assigned independently (two users may not share a uid, even if their gids differ).
+- `username` is present
+- `uid` is present
+- `gid` is present
+- `username`, `uid`, and `gid` are all unique among the rows being saved
 
-## How `index.php` works
+UID and GID are treated independently, so two users may not share the same UID even if their GIDs differ.
 
-Every request does the same three things: optionally seed the CSV, optionally save a POST, then render the current file.
+## Features
 
-1. **Seed.** If `users.csv` does not exist, the script creates it with the header row and two sample users (`jdoe`, `asmith`).
+- Add a new user from the blue `Add New User Entry` row at the top of the table
+- Auto-fill the next available UID/GID when creating a new user and the field is left blank
+- Edit any existing row directly in the browser
+- Delete any row by checking the `Delete` checkbox
+- Reject invalid saves instead of partially updating the CSV
+- Highlight duplicate or missing `username`, `uid`, or `gid` values in the form
+- Populate the authorized-host dropdown from `all`, `none`, and values already in the file
+- Use file locking while reading and writing the CSV to reduce race-condition issues
+- Keep table headers visible while scrolling and keep the save button fixed at the bottom-right
 
-2. **Save (POST only).** The form posts two groups of fields:
-   - `new_user[...]` — the blue “Add New User” row at the top. If **Username** is filled in, that row is written first.
-   - `users[i][...]` — every existing row. Checking **Delete** drops that row from the rewrite.
+## How the page behaves
 
-   If the new user’s uid or gid is left blank, the script fills in the next unused numeric value: one past the highest already used among the rows being kept (skipping any collision). You can still type your own values.
+Each request follows the same workflow:
 
-   Before writing, the script checks that every kept row has a username, uid, and gid, and that those three fields are unique. On failure the CSV is left unchanged, colliding fields are highlighted, and the form keeps your edits so you can fix them.
+1. Seed the file if it does not exist
+2. Process `POST` data for existing rows and the new-user form
+3. Validate identity fields (`username`, `uid`, `gid`)
+4. Rewrite the CSV only if the save is valid
+5. Render the updated table again
 
-   On success the file is replaced in one pass: exclusive `flock`, truncate, write the header, write the kept rows, flush, unlock. New users therefore appear at the top of the CSV on the next load.
+When validation fails, the CSV is left unchanged and the form keeps your edits so you can correct the problem without losing data.
 
-3. **Render.** The script opens the CSV with a shared lock, skips the header, and builds two lists:
-   - `$users` — every data row
-   - `$hosts` — `all` and `none`, plus every distinct `authorized-host` value already in the file
+## Using the app
 
-   Those feed the HTML table. Authorized Host is a `<select>` (new users default to `all`). Existing rows are editable inputs. The Add New User uid and gid fields are prefilled with the next unused IDs.
+- Open the page in a browser
+- Add a user by filling in the top row (username is required)
+- Edit any existing field and click **Save Changes**
+- Delete a row by checking the corresponding `Delete` box and saving
+- If a save would create duplicate `username`, `uid`, or `gid` values, it is rejected
 
-   Column headers stay pinned to the top of the viewport while you scroll. **Save Changes** stays in the bottom-right corner so you can save without scrolling to the end of the table.
+The PHP process must be able to read and write `users.csv` from the same directory as `index.php`.
 
-Short rows are padded to seven fields. Output is escaped with `htmlspecialchars`.
+## Quick Start
 
-## Using the page
+1. Make sure PHP is installed.
+2. Start the project from this directory:
 
-- **Add** a user: fill the top row (username is required). UID and GID are filled in for you; change them if you need to, then save.
-- **Edit** a user: change any field in an existing row and save.
-- **Delete** a user: check **Delete** on that row and save.
+```sh
+php -S 127.0.0.1:8000
+```
 
-A save that would duplicate a username, uid, or gid is rejected and the CSV is not written.
+3. Open `http://127.0.0.1:8000/index.php` in your browser.
+4. If `users.csv` does not exist yet, the app creates it automatically with sample users.
+5. Edit the table, add users, or mark rows for deletion, then click **Save Changes**.
 
-The web server user must be able to read and write `users.csv` in the same directory as `index.php`.
+## Screenshots
+
+These mockups show the main editor layout and the validation state when a duplicate or missing field is detected:
+
+![CSV User Manager overview](docs/csv-user-manager-overview.svg)
+
+![Validation example](docs/csv-user-manager-validation.svg)
+
+## Examples
+
+### Example CSV
+
+```csv
+username,uid,gid,email,home-directory,public-key,authorized-host
+jdoe,1001,1001,jdoe@example.com,/home/jdoe,ssh-rsa AAA...,server1.local
+asmith,1002,1002,asmith@example.com,/home/asmith,ssh-ed25519 AAA...,server2.local
+bsmith,1003,1003,bsmith@example.com,/home/bsmith,ssh-rsa AAA...,all
+```
+
+### Example add-user flow
+
+1. Fill in the top `Add New User Entry` row.
+2. Leave `uid` or `gid` blank if you want the app to assign the next available numeric value.
+3. Click `Save Changes`.
+4. If the new row creates a duplicate username, UID, or GID, the save is rejected and the invalid fields are highlighted.
+
+### Example validation errors
+
+```text
+CSV file was not updated:
+- Each user must have a username.
+- Duplicate uid values are not allowed: 1002.
+```
 
 ## Deploy
 
@@ -66,4 +116,4 @@ Requires PHP (for example Apache with `mod_php` or PHP-FPM). From this directory
 make push
 ```
 
-That copies `index.php` and `users.csv` to `/var/www/html`. Then open the page on the web server.
+That copies `index.php` and `users.csv` into `/var/www/html`. Then open the page on the web server.

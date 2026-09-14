@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="740" viewBox="0 0 1200 740">
+  <defs>
+    <style>
+      .bg { fill: #f9f9f9; }
+      .panel { fill: #ffffff; stroke: #d6d6d6; stroke-width: 1; }
+      .header { fill: #f2f2f2; stroke: #d6d6d6; stroke-width: 1; }
+      .title { font: 700 24px Arial; fill: #222; }
+      .small { font: 400 13px Arial; fill: #4d4d4d; }
+      .cell { fill: #fff; stroke: #cfcfcf; }
+      .input { fill: #fff; stroke: #b7b7b7; }
+      .new { fill: #eaf7ff; }
+      .new-head { fill: #dfeef8; }
+      .error { fill: #ffe6e6; stroke: #d74e4e; }
+      .button { fill: #007bff; }
+      .button-text { font: 700 18px Arial; fill: white; }
+      .muted { fill: #777; }
+      .pale { fill: #efefef; }
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="740"/>
+  <text class="title" x="40" y="52">CSV User Management System</text>
+  <g>
+    <rect class="panel" x="40" y="80" width="1120" height="560" rx="4"/>
+    <rect class="new-head" x="40" y="80" width="1120" height="36"/>
+    <text class="small" x="64" y="103" font-weight="700">Add New User Entry:</text>
+    <rect class="cell new" x="40" y="116" width="1120" height="56"/>
+    <rect class="input" x="58" y="132" width="120" height="24" rx="2"/>
+    <rect class="input" x="188" y="132" width="90" height="24" rx="2"/>
+    <rect class="input" x="288" y="132" width="90" height="24" rx="2"/>
+    <rect class="input" x="388" y="132" width="150" height="24" rx="2"/>
+    <rect class="input" x="548" y="132" width="150" height="24" rx="2"/>
+    <rect class="input" x="708" y="132" width="180" height="24" rx="2"/>
+    <rect class="input" x="898" y="132" width="120" height="24" rx="2"/>
+
+    <rect class="pale" x="40" y="172" width="1120" height="34"/>
+    <text class="small" x="64" y="194" font-weight="700">Existing Users:</text>
+
+    <g>
+      <rect class="header" x="40" y="206" width="1120" height="32"/>
+      <text class="small" x="55" y="227" font-weight="700">Username</text>
+      <text class="small" x="180" y="227" font-weight="700">UID</text>
+      <text class="small" x="282" y="227" font-weight="700">GID</text>
+      <text class="small" x="390" y="227" font-weight="700">Email</text>
+      <text class="small" x="555" y="227" font-weight="700">Home Directory</text>
+      <text class="small" x="708" y="227" font-weight="700">Public Key</text>
+      <text class="small" x="898" y="227" font-weight="700">Authorized Host</text>
+      <text class="small" x="1055" y="227" font-weight="700">Delete</text>
+    </g>
+
+    <g>
+      <rect class="cell" x="40" y="238" width="1120" height="48"/>
+      <rect class="input" x="58" y="250" width="120" height="22" rx="2"/>
+      <rect class="input" x="188" y="250" width="90" height="22" rx="2"/>
+      <rect class="input" x="288" y="250" width="90" height="22" rx="2"/>
+      <rect class="input" x="388" y="250" width="150" height="22" rx="2"/>
+      <rect class="input" x="548" y="250" width="150" height="22" rx="2"/>
+      <rect class="input" x="708" y="250" width="180" height="22" rx="2"/>
+      <rect class="input" x="898" y="250" width="120" height="22" rx="2"/>
+      <rect class="input" x="1055" y="250" width="26" height="22" rx="2"/>
+      <text class="small muted" x="896" y="278">server1.local</text>
+    </g>
+
+    <g>
+      <rect class="cell" x="40" y="286" width="1120" height="48"/>
+      <rect class="input" x="58" y="298" width="120" height="22" rx="2"/>
+      <rect class="input" x="188" y="298" width="90" height="22" rx="2"/>
+      <rect class="input" x="288" y="298" width="90" height="22" rx="2"/>
+      <rect class="input" x="388" y="298" width="150" height="22" rx="2"/>
+      <rect class="input" x="548" y="298" width="150" height="22" rx="2"/>
+      <rect class="input" x="708" y="298" width="180" height="22" rx="2"/>
+      <rect class="input" x="898" y="298" width="120" height="22" rx="2"/>
+      <rect class="input" x="1055" y="298" width="26" height="22" rx="2"/>
+    </g>
+  </g>
+  <g>
+    <rect class="button" x="1020" y="650" width="140" height="42" rx="4"/>
+    <text class="button-text" x="1065" y="678">Save</text>
+  </g>
+</svg>
