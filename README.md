@@ -12,7 +12,7 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `users-block.txt` | Generated `/etc/passwd`-format user entries; created by the Users List publish action |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
-| `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
+| `Makefile` | Copies the PHP, CSV, and generated block files to `/var/www/html` and assigns them to `www-data:www-data` |
 
 ## Authentication
 
@@ -129,13 +129,16 @@ From this directory:
 make push
 ```
 
-The target copies the PHP application and source CSV files into `/var/www/html`:
+The target copies the PHP application, source CSV files, and generated block files into `/var/www/html`, then assigns all copied files to `www-data:www-data`:
 
 ```sh
 sudo cp index.php /var/www/html
 sudo cp view.php /var/www/html
 sudo cp users.csv /var/www/html
 sudo cp hosts.csv /var/www/html
+sudo cp hosts-block.txt /var/www/html
+sudo cp users-block.txt /var/www/html
+sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt
 ```
 
 Then open `index.php` through the web server and sign in.
