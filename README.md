@@ -12,7 +12,6 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `users-block.txt` | Generated `/etc/passwd`-format user entries; created by the Users List publish action |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
-| `check-remote-groups.sh` | Uses SSH to check configured machine-groups and members on each remote host |
 | `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
 
 ## Screenshots
@@ -125,30 +124,6 @@ The dashboard can create two deployment-ready text blocks:
 | Users List → **Publish users-block.txt** | `users-block.txt` | `username:x:uid:gid:email:home-directory:/bin/bash` (`/etc/passwd` style) |
 
 After publishing, use **View Raw ...** to inspect the exact file or **Edit Raw ...** to make a direct authenticated edit. Editing a generated block does not update the source CSV, so source CSV changes should be made when the generated file needs to be regenerated.
-
-## Check remote machine groups
-
-Run the SSH checker from this directory:
-
-```sh
-./check-remote-groups.sh
-```
-
-The script reads the first column of `hosts.csv` as both the SSH target and remote machine-group name. For example, `tom1-tsand-org` checks the `tom1-tsand-org` group in the remote `/etc/group`.
-
-It reports whether the group was found and, when present, checks each user in the final `member-list` column individually. The script is report-only by default and does not modify remote systems. An alternate CSV path can be supplied:
-
-```sh
-./check-remote-groups.sh /path/to/hosts.csv
-```
-
-To append only users that are missing from an existing remote group, use:
-
-```sh
-./check-remote-groups.sh --apply
-```
-
-Apply mode uses `sudo gpasswd --add` for each missing user and verifies the user appears in the group after each append. It never removes existing members or replaces the complete member list. Missing groups are reported but not created. The member-list column contains usernames; `/etc/group` stores usernames rather than numeric user IDs.
 
 ## Deploy
 
