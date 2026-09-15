@@ -1,5 +1,6 @@
-fqdn,group-id,member-list
-tom1.tsand.org,5000,tsandholm
-tom2.tsand.org,5001,"mary,mikey,tsandholm"
-tom3.tsand.org,5002,"iggy,tsandholm"
-tom4.tsand.org,5003,"kat,tsandholm"
+machine-group,group-id,member-list
+tom1-tsand-org,5000,"ansible,sudo,tsandholm"
+tom2-tsand-org,5001,"ansible,sudo,mary,mikey,tsandholm"
+tom3-tsand-org,5002,"ansible,sudo,iggy,tsandholm"
+tom4-tsand-org,5003,"ansible,sudo,kat,tsandholm"
+tom5-tsand-org,5004,"ansible,sudo,kat,tsandholm"
