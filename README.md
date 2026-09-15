@@ -1,15 +1,13 @@
 # CSV User Manager
 
-An authenticated PHP dashboard for managing users and hosts stored in CSV files. `index.php` handles login, CSV reads/writes, and host membership sync. `view.php` is the HTML for the login page and the two-column users/hosts UI.
-
-The browser title is **CSV Core Dashboard**. After login the nav bar reads **System Infrastructure Database Dashboard**.
+A small PHP web dashboard for managing users and hosts stored in CSV files. The application provides an authenticated interface for creating, editing, and deleting user records and host records, and keeps host membership lists synchronized with user authorized-host mappings.
 
 ## Files
 
 | File | Role |
 | --- | --- |
-| `index.php` | Controller: session, login/logout, CSV I/O, membership sync, then includes `view.php` |
-| `view.php` | Login form and authenticated dashboard (users panel on the left, hosts panel on the right) |
+| `index.php` | Application controller: starts the session, handles login/logout, reads and writes both CSV files, synchronizes host memberships, and loads the dashboard |
+| `view.php` | HTML dashboard template included by `index.php`; contains the login form and authenticated users/hosts management interface |
 | `users.csv` | User records |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `check-remote-groups.sh` | Uses SSH to check FQDN-derived machine groups and configured members on each host |
@@ -17,43 +15,39 @@ The browser title is **CSV Core Dashboard**. After login the nav bar reads **Sys
 
 ## Authentication
 
-The dashboard is not shown and CSV files are not modified until the session is authenticated.
+The dashboard requires an authenticated session before either CSV database is displayed or modified.
 
-Credentials currently defined in `index.php`:
+The current credentials defined in `index.php` are:
 
 ```text
 Username: admin
 Password: secret123
 ```
 
-Change `ADMIN_USER` and `ADMIN_PASS` in `index.php` before deploying to a shared or production host. Failed logins show **Invalid credentials.** Use **Logout** to end the session (`index.php?action=logout`).
+Change `ADMIN_USER` and `ADMIN_PASS` in `index.php` before deploying to a shared or production environment. Use the **Logout** link in the dashboard to end the session.
 
 ## CSV formats
 
-`read_csv()` pads short rows and truncates extra columns to the expected width. Header rows are skipped in the UI when the first cell is `username` or `fqdn`.
-
-If a CSV file is missing, `index.php` creates an empty file with `touch`. The checked-in files already include headers.
-
 ### `users.csv`
+
+Each row represents one user:
 
 ```text
 username,uid,gid,email,home-directory,public-key,authorized-host
 ```
 
-Current records (keys abbreviated):
+Example:
 
 ```csv
 username,uid,gid,email,home-directory,public-key,authorized-host
 tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,ssh-rsa AAA...,*
-kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,tom4.tsand.org
+kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,*
 mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2.tsand.org
-mikey,3003,3003,tom.sandholm@gmail.com,/share/home/mikey,ssh-rsa AAA...,tom2.tsand.org
-iggy,3004,3004,tom.sandholm@gmail.com,/share/home/iggy,ssh-rsa AAA...,tom3.tsand.org
 ```
 
-`authorized-host` is either `*` (every host) or one FQDN from `hosts.csv`. The add/edit form dropdown is built from those host rows plus `*`.
+The `authorized-host` value may be `*` to represent all hosts, or a specific FQDN from `hosts.csv`.
 
-New users default UID and GID to one higher than the highest numeric values in the file (currently `3005`). The form pre-fills those values. If a new-user POST still leaves UID or GID blank, `index.php` applies the same calculation. Editing a user keeps the submitted UID/GID.
+When adding a user, the form defaults UID and GID to one higher than the highest numeric value currently assigned in `users.csv`. If either value is omitted from the submitted request, `index.php` applies the same calculation server-side. Editing an existing user preserves its current UID and GID unless they are changed explicitly.
 
 ### `hosts.csv`
 
@@ -63,17 +57,16 @@ Each row represents a managed machine-group:
 machine-group,group-id,member-list
 ```
 
-Current records:
+Example:
 
 ```csv
-fqdn,group-id,member-list
-tom1.tsand.org,5000,tsandholm
-tom2.tsand.org,5001,"mary,mikey,tsandholm"
-tom3.tsand.org,5002,"iggy,tsandholm"
-tom4.tsand.org,5003,"kat,tsandholm"
+machine-group,group-id,member-list
+tom1-tsand-org,5000,"tsandholm,ansible,mary"
+tom2-tsand-org,5001,"tsandholm,ansible,mike"
+tom3-tsand-org,5002,"tsandholm,ansible,iggy"
 ```
 
-`member-list` is calculated, not typed. The form field is read-only. After a user save/delete or a host save, `sync_hosts_members()` rebuilds each host’s list from `users.csv`:
+`member-list` is recalculated from `users.csv` whenever a user is saved or deleted, and whenever a host is saved. Users assigned to `*` are included on every managed host; users assigned to a specific FQDN are included only on that host. Duplicate member names are removed and the resulting list is sorted.
 
 When adding a machine-group, the form defaults Group ID to the next value after the highest numeric `group-id` already assigned in `hosts.csv`. Group IDs start at `5000` when no numeric IDs exist, and the server applies the same fallback when a new machine-group submission leaves the field blank. Editing an existing machine-group preserves its current Group ID unless it is changed explicitly.
 
@@ -93,27 +86,22 @@ When adding a machine-group, the form defaults Group ID to the next value after 
 - Create empty `users.csv` and `hosts.csv` files automatically if they are missing
 - Escape displayed CSV values with `htmlspecialchars`
 
-## How a request is handled
+The user and host forms use browser-level required-field validation. The current PHP handlers write submitted rows directly and do not enforce uniqueness or additional server-side validation, so CSV content should be reviewed before production use.
 
-1. Start the session and handle logout if requested
-2. Process login POST, or stop and render the login form
-3. Ensure `users.csv` and `hosts.csv` exist
-4. On POST, save or delete the targeted users or hosts row
-5. Sync host member lists after user save/delete and after host save
-6. Reload both CSVs and include `view.php`
+## Quick Start
 
-## Quick start
+1. Make sure PHP is installed.
+2. From this directory, start PHP's development server:
 
-1. Install PHP.
-2. From this directory:
-
-```sh
-php -S 127.0.0.1:8000
-```
+   ```sh
+   php -S 127.0.0.1:8000
+   ```
 
 3. Open `http://127.0.0.1:8000/index.php`.
 4. Sign in with the configured credentials.
-5. Manage users on the left and hosts on the right.
+5. Use the left panel to manage users and the right panel to manage hosts.
+
+If either CSV file is missing, `index.php` creates an empty file before loading the dashboard. Add the desired header row and records through the application or prepare the files beforehand.
 
 ## Check remote machine groups
 
@@ -143,7 +131,7 @@ Apply mode uses `sudo gpasswd --add` for each missing user and verifies the user
 
 ## Deploy
 
-Requires PHP (for example Apache with `mod_php` or PHP-FPM). The web server user must be able to read and write `users.csv` and `hosts.csv` in the same directory as the PHP files.
+Requires PHP, for example Apache with `mod_php` or PHP-FPM. The web server user must be able to read and write `index.php`, `view.php`, `users.csv`, and `hosts.csv`.
 
 From this directory:
 
@@ -151,4 +139,13 @@ From this directory:
 make push
 ```
 
-That copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` into `/var/www/html` (uses `sudo`). It does not copy this README. Then open `index.php` on the web server and sign in.
+The target copies all four application files into `/var/www/html`:
+
+```sh
+sudo cp index.php /var/www/html
+sudo cp view.php /var/www/html
+sudo cp users.csv /var/www/html
+sudo cp hosts.csv /var/www/html
+```
+
+Then open `index.php` through the web server and sign in.
