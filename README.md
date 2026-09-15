@@ -1,119 +1,151 @@
 # CSV User Manager
 
-A small PHP web app for managing a CSV-backed user directory. It lets you add, edit, and delete Linux-style user entries from a browser while validating required identifiers before writing back to disk.
+A small PHP web dashboard for managing users and hosts stored in CSV files. The application provides an authenticated interface for creating, editing, and deleting user records and host records, and keeps host membership lists synchronized with user authorized-host mappings.
 
 ## Files
 
 | File | Role |
 | --- | --- |
-| `index.php` | Main PHP page that reads `users.csv`, renders the editable table, validates changes, and writes the CSV back safely |
-| `users.csv` | Current user records; created automatically with sample rows if missing |
-| `Makefile` | Copies the app files into `/var/www/html` |
+| `index.php` | Application controller: starts the session, handles login/logout, reads and writes both CSV files, synchronizes host memberships, and loads the dashboard |
+| `view.php` | HTML dashboard template included by `index.php`; contains the login form and authenticated users/hosts management interface |
+| `users.csv` | User records |
+| `hosts.csv` | Host records and calculated comma-separated member lists |
+| `check-remote-groups.sh` | Uses SSH to check FQDN-derived machine groups and configured members on each host |
+| `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
 
-## CSV format
+## Authentication
 
-Each row represents one user. The header is always:
+The dashboard requires an authenticated session before either CSV database is displayed or modified.
+
+The current credentials defined in `index.php` are:
+
+```text
+Username: admin
+Password: secret123
+```
+
+Change `ADMIN_USER` and `ADMIN_PASS` in `index.php` before deploying to a shared or production environment. Use the **Logout** link in the dashboard to end the session.
+
+## CSV formats
+
+### `users.csv`
+
+Each row represents one user:
 
 ```text
 username,uid,gid,email,home-directory,public-key,authorized-host
 ```
 
-The app writes those seven columns in that exact order. A row is considered valid only when:
+Example:
 
-- `username` is present
-- `uid` is present
-- `gid` is present
-- `username`, `uid`, and `gid` are all unique among the rows being saved
+```csv
+username,uid,gid,email,home-directory,public-key,authorized-host
+tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,ssh-rsa AAA...,*
+kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,*
+mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2.tsand.org
+```
 
-UID and GID are treated independently, so two users may not share the same UID even if their GIDs differ.
+The `authorized-host` value may be `*` to represent all hosts, or a specific FQDN from `hosts.csv`.
 
-## Features
+When adding a user, the form defaults UID and GID to one higher than the highest numeric value currently assigned in `users.csv`. If either value is omitted from the submitted request, `index.php` applies the same calculation server-side. Editing an existing user preserves its current UID and GID unless they are changed explicitly.
 
-- Add a new user from the blue `Add New User Entry` row at the top of the table
-- Auto-fill the next available UID/GID when creating a new user and the field is left blank
-- Edit any existing row directly in the browser
-- Delete any row by checking the `Delete` checkbox
-- Reject invalid saves instead of partially updating the CSV
-- Highlight duplicate or missing `username`, `uid`, or `gid` values in the form
-- Populate the authorized-host dropdown from `all`, `none`, and values already in the file
-- Use file locking while reading and writing the CSV to reduce race-condition issues
-- Keep table headers visible while scrolling and keep the save button fixed at the bottom-right
+### `hosts.csv`
 
-## How the page behaves
+Each row represents a managed machine-group:
 
-Each request follows the same workflow:
+```text
+machine-group,group-id,member-list
+```
 
-1. Seed the file if it does not exist
-2. Process `POST` data for existing rows and the new-user form
-3. Validate identity fields (`username`, `uid`, `gid`)
-4. Rewrite the CSV only if the save is valid
-5. Render the updated table again
+Example:
 
-When validation fails, the CSV is left unchanged and the form keeps your edits so you can correct the problem without losing data.
+```csv
+machine-group,group-id,member-list
+tom1-tsand-org,5000,"tsandholm,ansible,mary"
+tom2-tsand-org,5001,"tsandholm,ansible,mike"
+tom3-tsand-org,5002,"tsandholm,ansible,iggy"
+```
 
-## Using the app
+`member-list` is recalculated from `users.csv` whenever a user is saved or deleted, and whenever a host is saved. Users assigned to `*` are included on every managed host; users assigned to a specific FQDN are included only on that host. Duplicate member names are removed and the resulting list is sorted.
 
-- Open the page in a browser
-- Add a user by filling in the top row (username is required)
-- Edit any existing field and click **Save Changes**
-- Delete a row by checking the corresponding `Delete` box and saving
-- If a save would create duplicate `username`, `uid`, or `gid` values, it is rejected
+When adding a machine-group, the form defaults Group ID to the next value after the highest numeric `group-id` already assigned in `hosts.csv`. Group IDs start at `5000` when no numeric IDs exist, and the server applies the same fallback when a new machine-group submission leaves the field blank. Editing an existing machine-group preserves its current Group ID unless it is changed explicitly.
 
-The PHP process must be able to read and write `users.csv` from the same directory as `index.php`.
+## Dashboard features
+
+- Add, edit, and delete users from the **Users List** panel
+- View full user details, including Home Directory and Public Key, from the Users List
+- Search Users by username, UID/GID, email, home directory, public key, or machine-group
+- Add, edit, and delete machine-groups from the **Hosts List** panel
+- Edit user identity, contact, SSH key, home directory, and authorized host fields
+- Edit machine-group and group ID fields
+- Display calculated host member lists
+- Synchronize host memberships after user changes
+- View or edit the raw `users.csv` and `hosts.csv` contents from their lists
+- Suggest the next available UID and GID for new users
+- Suggest the next available Group ID for new hosts, starting at `5000`
+- Create empty `users.csv` and `hosts.csv` files automatically if they are missing
+- Escape displayed CSV values with `htmlspecialchars`
+
+The user and host forms use browser-level required-field validation. The current PHP handlers write submitted rows directly and do not enforce uniqueness or additional server-side validation, so CSV content should be reviewed before production use.
 
 ## Quick Start
 
 1. Make sure PHP is installed.
-2. Start the project from this directory:
+2. From this directory, start PHP's development server:
+
+   ```sh
+   php -S 127.0.0.1:8000
+   ```
+
+3. Open `http://127.0.0.1:8000/index.php`.
+4. Sign in with the configured credentials.
+5. Use the left panel to manage users and the right panel to manage hosts.
+
+If either CSV file is missing, `index.php` creates an empty file before loading the dashboard. Add the desired header row and records through the application or prepare the files beforehand.
+
+## Check remote machine groups
+
+Run the SSH checker from this directory:
 
 ```sh
-php -S 127.0.0.1:8000
+./check-remote-groups.sh
 ```
 
-3. Open `http://127.0.0.1:8000/index.php` in your browser.
-4. If `users.csv` does not exist yet, the app creates it automatically with sample users.
-5. Edit the table, add users, or mark rows for deletion, then click **Save Changes**.
+The script reads the first column of `hosts.csv` as both the SSH target and remote machine-group name. For example, `tom1-tsand-org` checks the `tom1-tsand-org` group in the remote `/etc/group`.
 
-## Screenshots
+The Users List and Hosts List provide **View Raw CSV** and **Edit Raw CSV** buttons. Each editor displays the exact file contents in a textarea and saves the contents only when the corresponding **Save ...csv** button is clicked.
 
-These mockups show the main editor layout and the validation state when a duplicate or missing field is detected:
+It reports whether the group was found and, when present, checks each user in the final `member-list` column individually. The script is report-only by default and does not modify remote systems. An alternate CSV path can be supplied:
 
-![CSV User Manager overview](docs/csv-user-manager-overview.svg)
-
-![Validation example](docs/csv-user-manager-validation.svg)
-
-## Examples
-
-### Example CSV
-
-```csv
-username,uid,gid,email,home-directory,public-key,authorized-host
-jdoe,1001,1001,jdoe@example.com,/home/jdoe,ssh-rsa AAA...,server1.local
-asmith,1002,1002,asmith@example.com,/home/asmith,ssh-ed25519 AAA...,server2.local
-bsmith,1003,1003,bsmith@example.com,/home/bsmith,ssh-rsa AAA...,all
+```sh
+./check-remote-groups.sh /path/to/hosts.csv
 ```
 
-### Example add-user flow
+To append only users that are missing from an existing remote group, use:
 
-1. Fill in the top `Add New User Entry` row.
-2. Leave `uid` or `gid` blank if you want the app to assign the next available numeric value.
-3. Click `Save Changes`.
-4. If the new row creates a duplicate username, UID, or GID, the save is rejected and the invalid fields are highlighted.
-
-### Example validation errors
-
-```text
-CSV file was not updated:
-- Each user must have a username.
-- Duplicate uid values are not allowed: 1002.
+```sh
+./check-remote-groups.sh --apply
 ```
+
+Apply mode uses `sudo gpasswd --add` for each missing user and verifies the user appears in the group after each append. It never removes existing members or replaces the complete member list. Missing groups are reported but not created. The member-list column contains usernames; `/etc/group` stores usernames rather than numeric user IDs.
 
 ## Deploy
 
-Requires PHP (for example Apache with `mod_php` or PHP-FPM). From this directory:
+Requires PHP, for example Apache with `mod_php` or PHP-FPM. The web server user must be able to read and write `index.php`, `view.php`, `users.csv`, and `hosts.csv`.
+
+From this directory:
 
 ```sh
 make push
 ```
 
-That copies `index.php` and `users.csv` into `/var/www/html`. Then open the page on the web server.
+The target copies all four application files into `/var/www/html`:
+
+```sh
+sudo cp index.php /var/www/html
+sudo cp view.php /var/www/html
+sudo cp users.csv /var/www/html
+sudo cp hosts.csv /var/www/html
+```
+
+Then open `index.php` through the web server and sign in.
