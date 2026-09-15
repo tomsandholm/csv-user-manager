@@ -9,6 +9,7 @@ A small PHP web dashboard for managing users and hosts stored in CSV files. The 
 | `index.php` | Application controller: starts the session, handles login/logout, reads and writes both CSV files, synchronizes host memberships, and loads the dashboard |
 | `view.php` | HTML dashboard template included by `index.php`; contains the login form and authenticated users/hosts management interface |
 | `users.csv` | User records |
+| `users-block.txt` | Generated `/etc/passwd`-format user entries |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `check-remote-groups.sh` | Uses SSH to check FQDN-derived machine groups and configured members on each host |
 | `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
@@ -80,7 +81,8 @@ When adding a machine-group, the form defaults Group ID to the next value after 
 - Edit machine-group and group ID fields
 - Display calculated host member lists
 - Synchronize host memberships after user changes
-- View or edit the raw `users.csv` and `hosts.csv` contents from their lists
+- View or edit the raw `users.csv`, `hosts.csv`, `hosts-block.txt`, and `users-block.txt` contents from the dashboard
+- Publish `users.csv` as a `users-block.txt` file in `/etc/passwd` format
 - Suggest the next available UID and GID for new users
 - Suggest the next available Group ID for new hosts, starting at `5000`
 - Create empty `users.csv` and `hosts.csv` files automatically if they are missing
@@ -114,6 +116,10 @@ Run the SSH checker from this directory:
 The script reads the first column of `hosts.csv` as both the SSH target and remote machine-group name. For example, `tom1-tsand-org` checks the `tom1-tsand-org` group in the remote `/etc/group`.
 
 The Users List and Hosts List provide **View Raw CSV** and **Edit Raw CSV** buttons. Each editor displays the exact file contents in a textarea and saves the contents only when the corresponding **Save ...csv** button is clicked.
+
+The Hosts List also provides **View Raw hosts-block.txt** and **Edit Raw hosts-block.txt** buttons beside **Publish**. `hosts-block.txt` contains the generated `/etc/group` entries produced from `hosts.csv`; the raw editor can save direct changes to that file.
+
+The Users List provides **Publish users-block.txt**, **View Raw users-block.txt**, and **Edit Raw users-block.txt** buttons. Publish generates one `/etc/passwd`-format line per user using `username:x:uid:gid:email:home-directory:/bin/bash`; the raw view and editor show or save the generated file directly.
 
 It reports whether the group was found and, when present, checks each user in the final `member-list` column individually. The script is report-only by default and does not modify remote systems. An alternate CSV path can be supplied:
 

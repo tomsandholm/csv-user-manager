@@ -3,25 +3,25 @@
 <head>
     <title>CSV Core Dashboard</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f8f9fa; color: #333; padding-bottom: 40px; }
-        .nav { display: flex; justify-content: space-between; align-items: center; background: #212529; color: #fff; padding: 10px 25px; }
-        .container { max-width: 1200px; margin: 25px auto; padding: 0 15px; }
+        body { font-family: sans-serif; margin: 0; background: #f8f9fa; color: #333; overflow: hidden; }
+        .nav { display: flex; justify-content: space-between; align-items: center; background: #212529; color: #fff; padding: 7px 18px; }
+        .container { max-width: 1400px; height: calc(100vh - 52px); box-sizing: border-box; margin: 10px auto 0; padding: 0 10px; overflow: hidden; }
         .box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; margin: 100px auto; }
-        .panels-split { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+        .panels-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px; }
         .users-list-wide { width: 100%; box-sizing: border-box; }
-        .form-card { background: #fff; padding: 20px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 20px; }
-        .form-row { display: flex; margin-bottom: 12px; align-items: center; }
-        .form-row label { width: 140px; font-weight: bold; color: #495057; font-size: 14px; }
-        .form-row input, .form-row textarea, .form-row select { flex: 1; padding: 7px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-        .btn-sub { background: #4e73df; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .list-scroll { height: 240px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; margin-top: 10px; background: #fff; }
+        .form-card { background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 10px; }
+        .form-row { display: flex; margin-bottom: 7px; align-items: center; }
+        .form-row label { width: 125px; font-weight: bold; color: #495057; font-size: 12px; }
+        .form-row input, .form-row textarea, .form-row select { flex: 1; padding: 5px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
+        .btn-sub { background: #4e73df; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .list-scroll { height: 180px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; margin-top: 6px; background: #fff; }
         .users-list-scroll { overflow-x: hidden; overflow-y: auto; }
-        .hosts-list-scroll { height: 330px; overflow: auto; }
-        .search-row { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
-        .search-row label { font-weight: bold; color: #495057; font-size: 14px; }
-        .search-row input { flex: 1; max-width: 420px; padding: 7px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; }
+        .hosts-list-scroll { height: 220px; overflow: auto; }
+        .search-row { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; }
+        .search-row label { font-weight: bold; color: #495057; font-size: 12px; }
+        .search-row input { flex: 1; max-width: 420px; padding: 5px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 12px; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 0; margin-top: 0; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; overflow-wrap: anywhere; }
+        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd; font-size: 12px; overflow-wrap: anywhere; }
         .users-list-scroll table { table-layout: fixed; }
         .users-list-scroll th:first-child, .users-list-scroll td:first-child { white-space: nowrap; overflow-wrap: normal; }
         .users-list-scroll th:last-child, .users-list-scroll td:last-child { white-space: nowrap; overflow-wrap: normal; }
@@ -29,6 +29,9 @@
         thead th { background: #f8f9fc; color: #4e73df; font-weight: bold; box-shadow: 0 2px 3px rgba(0,0,0,0.12); }
         tr:hover { background: #f8f9fc; }
         .alert { padding:10px; border-radius:4px; margin-bottom:15px; font-weight:bold; }
+        .form-card h3 { margin: 0 0 8px 0 !important; padding-bottom: 5px !important; font-size: 15px; }
+        .users-list-wide h3, .panels-split > div > h3 { margin: 6px 0 !important; font-size: 15px; }
+        .users-list-wide > div:last-child, .panels-split > div > .list-scroll + div { margin-top: 6px !important; }
     </style>
 </head>
 <body>
@@ -130,6 +133,15 @@
                     </tbody>
                 </table>
                 </div>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                    <form method="POST">
+                        <input type="hidden" name="target_db" value="users">
+                        <input type="hidden" name="action" value="publish">
+                        <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish users-block.txt</button>
+                    </form>
+                    <a href="index.php?raw=users-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw users-block.txt</a>
+                    <a href="index.php?raw=users-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw users-block.txt</a>
+                </div>
                 </div>
             </div>
 
@@ -181,11 +193,15 @@
                     </tbody>
                 </table>
                 </div>
-                <form method="POST" style="margin-top:12px;">
-                    <input type="hidden" name="target_db" value="hosts">
-                    <input type="hidden" name="action" value="publish">
-                    <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish</button>
-                </form>
+                <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+                    <form method="POST">
+                        <input type="hidden" name="target_db" value="hosts">
+                        <input type="hidden" name="action" value="publish">
+                        <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish</button>
+                    </form>
+                    <a href="index.php?raw=hosts-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw hosts-block.txt</a>
+                    <a href="index.php?raw=hosts-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw hosts-block.txt</a>
+                </div>
             </div>
         </div>
 

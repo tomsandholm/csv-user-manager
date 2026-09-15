@@ -27,11 +27,16 @@ $csv_hosts = 'hosts.csv';
 if (!file_exists($csv_users)) { touch($csv_users); }
 if (!file_exists($csv_hosts)) { touch($csv_hosts); }
 
-// Allow authenticated users to inspect or edit raw CSV files without dashboard markup.
-if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts'], true)) {
-    $raw_file = $_GET['raw'] === 'users' ? $csv_users : $csv_hosts;
-    $raw_filename = $_GET['raw'] . '.csv';
-    $raw_contents = file_get_contents($raw_file);
+// Allow authenticated users to inspect or edit raw CSV and generated block files.
+if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-block', 'users-block'], true)) {
+    $raw_files = [
+        'users' => [$csv_users, 'users.csv'],
+        'hosts' => [$csv_hosts, 'hosts.csv'],
+        'hosts-block' => ['hosts-block.txt', 'hosts-block.txt'],
+        'users-block' => ['users-block.txt', 'users-block.txt'],
+    ];
+    [$raw_file, $raw_filename] = $raw_files[$_GET['raw']];
+    $raw_contents = file_exists($raw_file) ? file_get_contents($raw_file) : '';
     if ($raw_contents === false) {
         http_response_code(500);
         echo 'Unable to read ' . $raw_filename . '.';
@@ -252,6 +257,30 @@ function publish_hosts_block($csv_hosts, $output_file = 'hosts-block.txt') {
     return true;
 }
 
+// Write a /etc/passwd-format block from users.csv.
+function publish_users_block($csv_users, $output_file = 'users-block.txt') {
+    $users = read_csv($csv_users, 7);
+    $lines = [];
+    foreach ($users as $user) {
+        if (strtolower(trim($user[0] ?? '')) === 'username' || trim($user[0] ?? '') === '') {
+            continue;
+        }
+        $username = trim($user[0]);
+        $uid = trim($user[1] ?? '');
+        $gid = trim($user[2] ?? '');
+        $email = trim($user[3] ?? '');
+        $home_directory = trim($user[4] ?? '');
+        $lines[] = $username . ':x:' . $uid . ':' . $gid . ':' . $email . ':' . $home_directory . ':/bin/bash';
+    }
+    $content = $lines ? implode("\n", $lines) . "\n" : '';
+    if (($handle = fopen($output_file, 'w')) === FALSE) {
+        return false;
+    }
+    fwrite($handle, $content);
+    fclose($handle);
+    return true;
+}
+
 $message = ''; 
 $target_db = $_POST['target_db'] ?? ($_GET['target_db'] ?? 'users');
 $action = $_POST['action'] ?? ''; 
@@ -290,6 +319,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>User saved and hosts synced.</div>";
             }
             $row_index = -1;
+        }
+        elseif ($action === 'publish') {
+            if (publish_users_block($csv_users)) {
+                $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published /etc/passwd block to users-block.txt.</div>";
+            } else {
+                $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Could not write users-block.txt. Check file permissions.</div>";
+            }
         }
     } 
     elseif ($target_db === 'hosts') {
