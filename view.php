@@ -85,16 +85,17 @@
                 <h3>Users List (users.csv)</h3>
                 <!-- Existing users are displayed with edit and delete actions. -->
                 <table>
-                    <thead><tr><th>User</th><th>UID/GID</th><th>Email</th><th>Public Key</th><th>Auth Host</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>User</th><th>UID/GID</th><th>Email</th><th>Home Directory</th><th>Public Key</th><th>Auth Host</th><th>Actions</th></tr></thead>
                     <tbody>
                         <?php if (count($users) <= 1): ?>
-                            <tr><td colspan="6" style="text-align:center; color:#6c757d;">Empty database.</td></tr>
+                            <tr><td colspan="7" style="text-align:center; color:#6c757d;">Empty database.</td></tr>
                         <?php else: ?>
                             <?php foreach ($users as $idx => $u): if (strtolower(trim($u[0] ?? '')) === 'username') continue; ?>
                                 <tr>
                                     <td style="font-weight:bold; color:#4e73df;"><?php echo htmlspecialchars($u[0]); ?></td>
                                     <td><?php echo htmlspecialchars($u[1] . '/' . $u[2]); ?></td>
                                     <td><?php echo htmlspecialchars($u[3]); ?></td>
+                                    <td><?php echo htmlspecialchars($u[4]); ?></td>
                                     <td title="<?php echo htmlspecialchars($u[5]); ?>"><?php echo htmlspecialchars(substr($u[5], 0, 10)) . '...'; ?></td>
                                     <td><span style="background:#e9ecef; padding:2px 6px; border-radius:4px; font-family:monospace;"><?php echo htmlspecialchars($u[6]); ?></span></td>
                                     <td style="white-space:nowrap;">
