@@ -11,8 +11,9 @@ The browser title is **CSV Core Dashboard**. After login the nav bar reads **Sys
 | `index.php` | Controller: session, login/logout, CSV I/O, membership sync, then includes `view.php` |
 | `view.php` | Login form and authenticated dashboard (users panel on the left, hosts panel on the right) |
 | `users.csv` | User records |
-| `hosts.csv` | Host records and calculated member lists |
-| `Makefile` | `make push` copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` into `/var/www/html` |
+| `hosts.csv` | Host records and calculated comma-separated member lists |
+| `check-remote-groups.sh` | Uses SSH to check FQDN-derived machine groups and configured members on each host |
+| `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
 
 ## Authentication
 
@@ -56,8 +57,10 @@ New users default UID and GID to one higher than the highest numeric values in t
 
 ### `hosts.csv`
 
+Each row represents a managed machine-group:
+
 ```text
-fqdn,group-id,member-list
+machine-group,group-id,member-list
 ```
 
 Current records:
@@ -72,23 +75,23 @@ tom4.tsand.org,5003,"kat,tsandholm"
 
 `member-list` is calculated, not typed. The form field is read-only. After a user save/delete or a host save, `sync_hosts_members()` rebuilds each host’s list from `users.csv`:
 
-- users with `authorized-host` equal to that FQDN
-- plus users with `authorized-host` of `*`
-
-Duplicates are removed and names are sorted. Deleting a host does not recalculate the remaining hosts.
-
-New hosts default Group ID to one past the highest numeric `group-id` (floor `4999`, so the first ID is `5000`). With the current file the next value is `5004`. The Group ID input has `min="5000"`. Editing a host keeps the submitted Group ID unless you change it.
+When adding a machine-group, the form defaults Group ID to the next value after the highest numeric `group-id` already assigned in `hosts.csv`. Group IDs start at `5000` when no numeric IDs exist, and the server applies the same fallback when a new machine-group submission leaves the field blank. Editing an existing machine-group preserves its current Group ID unless it is changed explicitly.
 
 ## Dashboard features
 
-- **Add User** / **Edit User** on the left; **Add New Host** / **Edit Host** on the right
-- Edit and Del on each list row (delete asks for confirmation)
-- User fields: username, email, UID, GID, home directory, public key, authorized host
-- Host fields: FQDN, group ID; member list is displayed and recalculated
-- Public keys in the users table are truncated to 10 characters (full value on hover)
-- Empty tables show **Empty database.** when there is only a header row (or fewer)
-- Displayed CSV values are escaped with `htmlspecialchars`
-- Browser `required` attributes on the forms; PHP writes submitted rows as given and does not check uniqueness
+- Add, edit, and delete users from the **Users List** panel
+- View full user details, including Home Directory and Public Key, from the Users List
+- Search Users by username, UID/GID, email, home directory, public key, or machine-group
+- Add, edit, and delete machine-groups from the **Hosts List** panel
+- Edit user identity, contact, SSH key, home directory, and authorized host fields
+- Edit machine-group and group ID fields
+- Display calculated host member lists
+- Synchronize host memberships after user changes
+- View or edit the raw `users.csv` and `hosts.csv` contents from their lists
+- Suggest the next available UID and GID for new users
+- Suggest the next available Group ID for new hosts, starting at `5000`
+- Create empty `users.csv` and `hosts.csv` files automatically if they are missing
+- Escape displayed CSV values with `htmlspecialchars`
 
 ## How a request is handled
 
@@ -111,6 +114,32 @@ php -S 127.0.0.1:8000
 3. Open `http://127.0.0.1:8000/index.php`.
 4. Sign in with the configured credentials.
 5. Manage users on the left and hosts on the right.
+
+## Check remote machine groups
+
+Run the SSH checker from this directory:
+
+```sh
+./check-remote-groups.sh
+```
+
+The script reads the first column of `hosts.csv` as both the SSH target and remote machine-group name. For example, `tom1-tsand-org` checks the `tom1-tsand-org` group in the remote `/etc/group`.
+
+The Users List and Hosts List provide **View Raw CSV** and **Edit Raw CSV** buttons. Each editor displays the exact file contents in a textarea and saves the contents only when the corresponding **Save ...csv** button is clicked.
+
+It reports whether the group was found and, when present, checks each user in the final `member-list` column individually. The script is report-only by default and does not modify remote systems. An alternate CSV path can be supplied:
+
+```sh
+./check-remote-groups.sh /path/to/hosts.csv
+```
+
+To append only users that are missing from an existing remote group, use:
+
+```sh
+./check-remote-groups.sh --apply
+```
+
+Apply mode uses `sudo gpasswd --add` for each missing user and verifies the user appears in the group after each append. It never removes existing members or replaces the complete member list. Missing groups are reported but not created. The member-list column contains usernames; `/etc/group` stores usernames rather than numeric user IDs.
 
 ## Deploy
 
