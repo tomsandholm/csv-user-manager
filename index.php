@@ -317,7 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             $row_index = -1;
         }
         elseif ($action === 'publish') {
-            sync_hosts_members($csv_users, $csv_hosts);
+            // Read hosts.csv as-is; do not recalculate or rewrite memberships.
             if (publish_hosts_block($csv_hosts)) {
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published /etc/group block to hosts-block.txt.</div>";
             } else {
