@@ -1,4 +1,5 @@
 fqdn,group-id,member-list
-tom1.tsand.org,5000,"tsandholm,ansible,mary"
-tom2.tsand.org,5001,"tsandholm,ansible,mike"
-tom3.tsand.org,5002,"tsandholm,ansible,iggy"
+tom1.tsand.org,5000,tsandholm
+tom2.tsand.org,5001,"mary,mikey,tsandholm"
+tom3.tsand.org,5002,"iggy,tsandholm"
+tom4.tsand.org,5003,"kat,tsandholm"
