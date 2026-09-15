@@ -1,4 +1,3 @@
-machine-group,group-id,member-list
 tom1-tsand-org,5000,"ansible,sudo,tsandholm"
 tom2-tsand-org,5001,"ansible,sudo,mary,mikey,tsandholm"
 tom3-tsand-org,5002,"ansible,sudo,iggy,tsandholm"
