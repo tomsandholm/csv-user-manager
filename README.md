@@ -14,12 +14,6 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
 | `Makefile` | Copies `index.php`, `view.php`, `users.csv`, and `hosts.csv` to `/var/www/html` |
 
-## Screenshots
-
-![Dashboard overview](docs/csv-user-manager-overview.svg)
-
-![CSV validation and generated output](docs/csv-user-manager-validation.svg)
-
 ## Authentication
 
 The dashboard requires an authenticated session before either CSV database is displayed or modified.
