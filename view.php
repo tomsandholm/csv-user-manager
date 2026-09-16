@@ -3,9 +3,9 @@
 <head>
     <title>CSV Core Dashboard</title>
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f8f9fa; color: #333; overflow: hidden; }
+        body { font-family: sans-serif; margin: 0; background: #f8f9fa; color: #333; overflow-y: auto; }
         .nav { display: flex; justify-content: space-between; align-items: center; background: #212529; color: #fff; padding: 7px 18px; }
-        .container { max-width: 1400px; height: calc(100vh - 52px); box-sizing: border-box; margin: 10px auto 0; padding: 0 10px; overflow: hidden; }
+        .container { max-width: 1400px; min-height: calc(100vh - 52px); box-sizing: border-box; margin: 10px auto 0; padding: 0 10px; }
         .box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; margin: 100px auto; }
         .panels-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px; }
         .users-list-wide { width: 100%; box-sizing: border-box; }
