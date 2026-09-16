@@ -10,10 +10,12 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `view.php` | HTML dashboard template included by `index.php`; contains the login form and authenticated users/hosts management interface |
 | `users.csv` | User records |
 | `users-block.txt` | Generated `/etc/passwd`-format user entries; created by the Users List publish action |
+| `groups-block.txt` | Generated `/etc/group`-format primary user groups; created with `users-block.txt` |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
-| `update-group-block.yml` | Ansible playbook that installs the generated machine-group block in `/etc/group`; also run by the Hosts List Publish button |
-| `update-user-block.yml` | Ansible playbook that installs the generated user block in `/etc/passwd`; also run by the Users List publish button |
+| `update-group-block.yml` | Ansible playbook that manually installs the generated machine-group block in `/etc/group` |
+| `update-user-block.yml` | Ansible playbook that manually installs the generated user block in `/etc/passwd` |
+| `setup-local-user-homes.yml` | Local-only Ansible playbook that creates user home directories and installs public keys |
 | `Makefile` | Copies the PHP, CSV, generated block, and Ansible playbook files to `/var/www/html` and assigns them to `www-data:www-data` |
 
 ## Authentication
@@ -86,6 +88,7 @@ When adding a machine-group, the form defaults Group ID to the next value after 
 - Publish, view, and edit raw `hosts-block.txt` and `users-block.txt` files
 - Generate `hosts-block.txt` in `/etc/group` format from `hosts.csv`
 - Generate `users-block.txt` in `/etc/passwd` format from `users.csv`
+- Generate `groups-block.txt` in `/etc/group` format from `users-block.txt`
 - Refuse to publish an empty or unreadable `users.csv` as `users-block.txt`
 - Write generated user blocks atomically so a failed write cannot replace the existing file
 - Suggest the next available UID and GID for new users
@@ -118,8 +121,8 @@ The dashboard can create two deployment-ready text blocks:
 
 | Button | Output | Format |
 | --- | --- | --- |
-| Hosts List → **Publish** | `hosts-block.txt` and remote `/etc/group` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
-| Users List → **Publish users-block.txt** | `users-block.txt` and remote `/etc/passwd` | `username:x:uid:gid:email:home-directory:/bin/bash` (`/etc/passwd` style) |
+| Hosts List → **Publish** | `hosts-block.txt` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
+| Users List → **Publish users-block.txt** | `users-block.txt` and `groups-block.txt` | `username:x:uid:gid:email:home-directory:/bin/bash` plus `username:x:gid:` (`/etc/group` style) |
 
 After publishing, use **View Raw ...** to inspect the exact file or **Edit Raw ...** to make a direct authenticated edit. Editing a generated block does not update the source CSV, so source CSV changes should be made when the generated file needs to be regenerated.
 
@@ -127,14 +130,24 @@ User-block publishing requires a readable `users.csv` with at least one valid
 user row. The application writes the generated content to a temporary file and
 renames it into place only after the complete block has been written, preserving
 the previous `users-block.txt` if generation or writing fails.
+The same publish action then derives `groups-block.txt` from the generated
+user block so each user's primary group name and GID are available for remote
+group creation.
 
 ## Apply generated blocks with Ansible
 
-`update-group-block.yml` reads `hosts-block.txt` from the controller and uses
+The playbooks read their input files from `/var/www/html` on the Ansible
+controller, where `make push` deploys the CSV and block files.
+`update-group-block.yml` reads `/var/www/html/hosts-block.txt` and uses
 `ansible.builtin.blockinfile` to replace one managed block in `/etc/group` on
-every host in the `virt` inventory group. `update-user-block.yml` performs the
-same operation for `users-block.txt` and `/etc/passwd`. Both playbooks run with
-privilege escalation, update one host at a time, and create a backup before
+every host in the `virt` inventory group. `update-user-block.yml` reads
+`/var/www/html/users-block.txt` and `/var/www/html/groups-block.txt`, then
+performs the same operation for `/etc/passwd`. After updating the
+managed passwd block, it runs `pwconv` to synchronize the local shadow file.
+Before updating
+`/etc/passwd`, the user playbook ensures that every user's primary account
+group exists remotely with the GID from the generated block. Both playbooks run
+with privilege escalation, update one host at a time, and create a backup before
 changing each file.
 
 The generated block must contain `/etc/group`-format lines, for example:
@@ -144,27 +157,13 @@ tom1-tsand-org:x:5000:ansible,sudo,tsandholm
 tom2-tsand-org:x:5001:ansible,sudo,mary,mikey,tsandholm
 ```
 
-The Hosts List **Publish** button writes the current `hosts-block.txt` and then
-runs `update-group-block.yml` with `--diff`. The Users List **Publish
-users-block.txt** button writes the current `users-block.txt` and then runs
-`update-user-block.yml` with `--diff`. The web server account must be able to
-execute `ansible-playbook`, read both playbooks and block files, access the
-configured inventory, use SSH credentials, and escalate privileges on the
-managed hosts. Configure the inventory path with
-the `ANSIBLE_INVENTORY` environment variable; it defaults to
-`/etc/ansible/hosts`. Configure the executable with `ANSIBLE_PLAYBOOK`; it
-defaults to `/usr/bin/ansible-playbook`. Dashboard-triggered runs use
-`HOME=/tmp` and `ANSIBLE_LOCAL_TEMP=/tmp` so the `www-data` account does not
-need writable `/var/www/.ansible` or `/var/www/.ssh` directories. SSH uses
-`/tmp/csv-user-manager-known_hosts` with new host keys accepted automatically.
-The playbook connects as the `ansible` user by default instead of the
-`www-data` web account. Set `ANSIBLE_REMOTE_USER` to use a different remote
-account and set `ANSIBLE_PRIVATE_KEY` to an SSH private-key path readable by
-`www-data`; it defaults to `/var/www/.ssh/csv-user-manager_id_rsa`. This should
-be a dedicated key, not a personal controller key. Authorize its public key
-for the `ansible` account on every host in the `virt` group. The web server
-account still needs valid SSH credentials for the inventory hosts and
-permission to use privilege escalation.
+The Hosts List **Publish** button writes only the current `hosts-block.txt`.
+The Users List **Publish users-block.txt** button writes only the current
+`users-block.txt`; neither button runs Ansible. To apply either block remotely,
+run the corresponding playbook manually. The web server account does not need
+to execute Ansible for publishing. Manual playbook runs require access to both
+playbooks and block files, the configured inventory, SSH credentials, and
+privilege escalation on the managed hosts.
 
 Run a dry run manually first, then apply the change:
 
@@ -181,9 +180,10 @@ other `/etc/group` entries unchanged:
 # END CSV User Manager managed groups
 ```
 
-The Users List **Publish users-block.txt** button similarly writes the current
-user block and runs `update-user-block.yml` against the `virt` group. It replaces
-only the managed section between these markers in `/etc/passwd`:
+`update-user-block.yml` similarly writes the current user block when run
+manually against the `virt` group. It replaces or creates each user's primary
+group first, then replaces only the managed section between these markers in
+`/etc/passwd`:
 
 ```text
 # BEGIN CSV User Manager managed users
@@ -196,6 +196,33 @@ The user playbook can also be run manually:
 ansible-playbook -i inventory update-user-block.yml --check --diff
 ansible-playbook -i inventory update-user-block.yml --diff
 ```
+
+## Create local user homes and SSH access
+
+`setup-local-user-homes.yml` is intentionally restricted to the Ansible
+controller:
+
+```yaml
+hosts: localhost
+connection: local
+```
+
+It reads usernames and home directories from `/var/www/html/users-block.txt`,
+matches each user to the public key in `/var/www/html/users.csv`, and maps source paths under
+`/share/home` to `/usr/share/home` on the controller. It creates each local
+home directory and writes the key to `.ssh/authorized_keys`. Home directories use mode `0700`;
+`authorized_keys` uses mode `0600`. The local system must already contain each
+user and its primary group.
+
+Run it from the repository directory:
+
+```sh
+ansible-playbook -i localhost, setup-local-user-homes.yml --check --diff
+ansible-playbook -i localhost, setup-local-user-homes.yml
+```
+
+The playbook uses `become: true` because it changes ownership and writes into
+user-owned local home directories. It never targets the remote `virt` hosts.
 
 ## Deploy
 
@@ -216,9 +243,11 @@ sudo cp users.csv /var/www/html
 sudo cp hosts.csv /var/www/html
 sudo cp hosts-block.txt /var/www/html
 sudo cp users-block.txt /var/www/html
+sudo cp groups-block.txt /var/www/html
 sudo cp update-group-block.yml /var/www/html
 sudo cp update-user-block.yml /var/www/html
-sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt /var/www/html/update-group-block.yml /var/www/html/update-user-block.yml
+sudo cp setup-local-user-homes.yml /var/www/html
+sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt /var/www/html/groups-block.txt /var/www/html/update-group-block.yml /var/www/html/update-user-block.yml /var/www/html/setup-local-user-homes.yml
 ```
 
 Then open `index.php` through the web server and sign in.

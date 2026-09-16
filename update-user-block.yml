@@ -7,7 +7,8 @@
 
   vars:
     passwd_file: /etc/passwd
-    passwd_block_file: "{{ playbook_dir }}/users-block.txt"
+    passwd_block_file: /var/www/html/users-block.txt
+    groups_block_file: /var/www/html/groups-block.txt
     passwd_block_marker: "CSV User Manager managed users"
 
   pre_tasks:
@@ -29,7 +30,35 @@
       become: false
       run_once: true
 
+    - name: Read the generated primary groups block from the controller
+      ansible.builtin.set_fact:
+        csv_user_manager_groups_block: "{{ lookup('ansible.builtin.file', groups_block_file) }}"
+      delegate_to: localhost
+      delegate_facts: true
+      become: false
+      run_once: true
+
+    - name: Ensure the generated primary groups block is not empty
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].csv_user_manager_groups_block | trim | length > 0
+        fail_msg: >-
+          {{ groups_block_file }} is empty. Publish users-block.txt before
+          running this playbook.
+      become: false
+      run_once: true
+
   tasks:
+    - name: Ensure each user account group exists
+      ansible.builtin.group:
+        name: "{{ item.split(':')[0] }}"
+        gid: "{{ item.split(':')[2] | int }}"
+        state: present
+      loop: "{{ hostvars['localhost'].csv_user_manager_groups_block.splitlines() }}"
+      loop_control:
+        label: "{{ item.split(':')[0] }}"
+      when: item | trim | length > 0
+
     - name: Replace the managed user block in /etc/passwd
       ansible.builtin.blockinfile:
         path: "{{ passwd_file }}"
@@ -38,3 +67,8 @@
         insertafter: EOF
         create: false
         backup: true
+
+    - name: Synchronize shadow entries with passwd
+      ansible.builtin.command:
+        cmd: pwconv
+      changed_when: true

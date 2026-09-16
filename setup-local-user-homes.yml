@@ -1,0 +1,108 @@
+---
+- name: Create local user homes and install SSH public keys
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: false
+
+  vars:
+    users_block_file: /var/www/html/users-block.txt
+    users_csv_file: /var/www/html/users.csv
+    source_home_prefix: /share/home
+    local_home_prefix: /usr/share/home
+
+  pre_tasks:
+    - name: Read the generated users block from the controller
+      ansible.builtin.set_fact:
+        csv_user_manager_users_block: "{{ lookup('ansible.builtin.file', users_block_file) }}"
+
+    - name: Read the users CSV from the controller
+      ansible.builtin.set_fact:
+        csv_user_manager_users_csv: "{{ lookup('ansible.builtin.file', users_csv_file) }}"
+
+    - name: Ensure the generated users block is not empty
+      ansible.builtin.assert:
+        that:
+          - csv_user_manager_users_block | trim | length > 0
+        fail_msg: "{{ users_block_file }} is empty."
+
+    - name: Ensure the users CSV is not empty
+      ansible.builtin.assert:
+        that:
+          - csv_user_manager_users_csv | trim | length > 0
+        fail_msg: "{{ users_csv_file }} is empty."
+
+    - name: Build local user records from users-block.txt and users.csv
+      ansible.builtin.set_fact:
+        csv_user_manager_local_users: >-
+          {{
+            csv_user_manager_local_users | default([]) + [{
+              'username': user_fields[0],
+              'home': user_fields[5] | regex_replace('^' ~ source_home_prefix, local_home_prefix),
+              'public_key': csv_fields[5]
+            }]
+          }}
+      vars:
+        user_fields: "{{ user_line.split(':') }}"
+        csv_line: >-
+          {{
+            csv_user_manager_users_csv.splitlines()
+            | select('match', '^' ~ user_line.split(':')[0] ~ ',')
+            | first
+          }}
+        csv_fields: "{{ csv_line.split(',', 6) }}"
+      loop: "{{ csv_user_manager_users_block.splitlines() }}"
+      loop_control:
+        loop_var: user_line
+        label: "{{ user_line.split(':')[0] }}"
+      when:
+        - user_line | trim | length > 0
+        - user_line.split(':') | length >= 6
+        - user_line.split(':')[0] | trim | length > 0
+        - user_line.split(':')[5] | trim | length > 0
+        - csv_user_manager_users_csv.splitlines()
+          | select('match', '^' ~ user_line.split(':')[0] ~ ',')
+          | list
+          | length > 0
+
+    - name: Ensure every generated user has a CSV public key
+      ansible.builtin.assert:
+        that:
+          - csv_user_manager_local_users | default([]) | length > 0
+        fail_msg: >-
+          No valid user records with matching public keys were found in
+          users-block.txt and users.csv.
+
+  tasks:
+    - name: Ensure each local user home directory exists
+      ansible.builtin.file:
+        path: "{{ item.home }}"
+        state: directory
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "0700"
+      loop: "{{ csv_user_manager_local_users }}"
+      loop_control:
+        label: "{{ item.username }} -> {{ item.home }}"
+
+    - name: Ensure each local user's SSH directory exists
+      ansible.builtin.file:
+        path: "{{ item.home }}/.ssh"
+        state: directory
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "0700"
+      loop: "{{ csv_user_manager_local_users }}"
+      loop_control:
+        label: "{{ item.username }}"
+
+    - name: Install each user's public key
+      ansible.builtin.copy:
+        content: "{{ item.public_key | trim | trim('\"') }}\n"
+        dest: "{{ item.home }}/.ssh/authorized_keys"
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "0600"
+      loop: "{{ csv_user_manager_local_users }}"
+      loop_control:
+        label: "{{ item.username }}"

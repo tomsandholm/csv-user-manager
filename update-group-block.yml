@@ -7,7 +7,7 @@
 
   vars:
     group_file: /etc/group
-    group_block_file: "{{ playbook_dir }}/hosts-block.txt"
+    group_block_file: /var/www/html/hosts-block.txt
     group_block_marker: "CSV User Manager managed groups"
 
   pre_tasks:

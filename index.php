@@ -2,10 +2,6 @@
 session_start();
 define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'secret123');
-define('ANSIBLE_PLAYBOOK', getenv('ANSIBLE_PLAYBOOK') ?: '/usr/bin/ansible-playbook');
-define('ANSIBLE_INVENTORY', getenv('ANSIBLE_INVENTORY') ?: '/etc/ansible/hosts');
-define('ANSIBLE_REMOTE_USER', getenv('ANSIBLE_REMOTE_USER') ?: 'ansible');
-define('ANSIBLE_PRIVATE_KEY', getenv('ANSIBLE_PRIVATE_KEY') ?: '/var/www/.ssh/csv-user-manager_id_rsa');
 
 // Log out by clearing the session before redirecting back to the login page.
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
@@ -32,12 +28,13 @@ if (!file_exists($csv_users)) { touch($csv_users); }
 if (!file_exists($csv_hosts)) { touch($csv_hosts); }
 
 // Allow authenticated users to inspect or edit raw CSV and generated block files.
-if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-block', 'users-block'], true)) {
+if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-block', 'users-block', 'groups-block'], true)) {
     $raw_files = [
         'users' => [$csv_users, 'users.csv'],
         'hosts' => [$csv_hosts, 'hosts.csv'],
         'hosts-block' => ['hosts-block.txt', 'hosts-block.txt'],
         'users-block' => ['users-block.txt', 'users-block.txt'],
+        'groups-block' => ['groups-block.txt', 'groups-block.txt'],
     ];
     [$raw_file, $raw_filename] = $raw_files[$_GET['raw']];
     $raw_contents = file_exists($raw_file) ? file_get_contents($raw_file) : '';
@@ -261,23 +258,6 @@ function publish_hosts_block($csv_hosts, $output_file = 'hosts-block.txt') {
     return true;
 }
 
-// Apply the generated group block to inventory hosts through Ansible.
-function apply_hosts_block_with_ansible($playbook, $inventory) {
-    // www-data may have an unwritable /var/www home; keep Ansible and SSH files in /tmp.
-    $command = 'env HOME=/tmp ANSIBLE_LOCAL_TEMP=/tmp'
-        . ' ANSIBLE_SSH_ARGS=' . escapeshellarg('-o UserKnownHostsFile=/tmp/csv-user-manager-known_hosts -o StrictHostKeyChecking=accept-new')
-        . ' ' . escapeshellarg(ANSIBLE_PLAYBOOK)
-        . ' -i ' . escapeshellarg($inventory)
-        . ' ' . escapeshellarg($playbook)
-        . ' -e ' . escapeshellarg('ansible_user=' . ANSIBLE_REMOTE_USER)
-        . (ANSIBLE_PRIVATE_KEY !== '' ? ' --private-key ' . escapeshellarg(ANSIBLE_PRIVATE_KEY) : '')
-        . ' --diff 2>&1';
-    $output = [];
-    $status = 1;
-    exec($command, $output, $status);
-    return ['status' => $status, 'output' => implode("\n", $output)];
-}
-
 // Write a /etc/passwd-format block from users.csv.
 function publish_users_block($csv_users, $output_file = 'users-block.txt') {
     if (!is_readable($csv_users)) {
@@ -304,6 +284,40 @@ function publish_users_block($csv_users, $output_file = 'users-block.txt') {
     if (($handle = fopen($temporary_file, 'x')) === FALSE) {
         return false;
     }
+    if (fwrite($handle, $content) === false) {
+        fclose($handle);
+        unlink($temporary_file);
+        return false;
+    }
+    fclose($handle);
+    if (!rename($temporary_file, $output_file)) {
+        unlink($temporary_file);
+        return false;
+    }
+    return true;
+}
+
+// Write primary user groups in /etc/group format from users-block.txt.
+function publish_groups_block($users_block_file, $output_file = 'groups-block.txt') {
+    if (!is_readable($users_block_file)) {
+        return false;
+    }
+    $lines = [];
+    foreach (file($users_block_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $user_line) {
+        $fields = explode(':', $user_line);
+        if (count($fields) < 4 || trim($fields[0]) === '' || !ctype_digit(trim($fields[3]))) {
+            continue;
+        }
+        $lines[] = trim($fields[0]) . ':x:' . trim($fields[3]) . ':';
+    }
+    if (!$lines) {
+        return false;
+    }
+    $temporary_file = $output_file . '.tmp.' . getmypid();
+    if (($handle = fopen($temporary_file, 'x')) === false) {
+        return false;
+    }
+    $content = implode("\n", $lines) . "\n";
     if (fwrite($handle, $content) === false) {
         fclose($handle);
         unlink($temporary_file);
@@ -357,16 +371,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             $row_index = -1;
         }
         elseif ($action === 'publish') {
-            if (publish_users_block($csv_users)) {
-                $ansible_result = apply_hosts_block_with_ansible(__DIR__ . '/update-user-block.yml', ANSIBLE_INVENTORY);
-                if ($ansible_result['status'] === 0) {
-                    $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published users-block.txt and updated /etc/passwd on all Ansible hosts.</div>";
-                } else {
-                    $ansible_output = htmlspecialchars($ansible_result['output']);
-                    $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Published users-block.txt, but the Ansible update failed (exit code {$ansible_result['status']}).<pre style='white-space:pre-wrap; margin:8px 0 0;'>{$ansible_output}</pre></div>";
-                }
+            if (publish_users_block($csv_users) && publish_groups_block('users-block.txt')) {
+                $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published users-block.txt and groups-block.txt.</div>";
             } else {
-                $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Could not write users-block.txt. Check file permissions.</div>";
+                $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Could not write users-block.txt or groups-block.txt. Check file permissions and source data.</div>";
             }
         }
     } 
@@ -395,15 +403,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             $row_index = -1;
         }
         elseif ($action === 'publish') {
-            // Publish first so the playbook always applies the current hosts.csv contents.
             if (publish_hosts_block($csv_hosts)) {
-                $ansible_result = apply_hosts_block_with_ansible(__DIR__ . '/update-group-block.yml', ANSIBLE_INVENTORY);
-                if ($ansible_result['status'] === 0) {
-                    $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published hosts-block.txt and updated /etc/group on all Ansible hosts.</div>";
-                } else {
-                    $ansible_output = htmlspecialchars($ansible_result['output']);
-                    $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Published hosts-block.txt, but the Ansible update failed (exit code {$ansible_result['status']}).<pre style='white-space:pre-wrap; margin:8px 0 0;'>{$ansible_output}</pre></div>";
-                }
+                $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published hosts-block.txt.</div>";
             } else {
                 $message = "<div class='alert' style='color:#721c24; background:#f8d7da;'>Could not write hosts-block.txt. Check file permissions.</div>";
             }
