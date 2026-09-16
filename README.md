@@ -12,7 +12,9 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `users-block.txt` | Generated `/etc/passwd`-format user entries; created by the Users List publish action |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
-| `Makefile` | Copies the PHP, CSV, and generated block files to `/var/www/html` and assigns them to `www-data:www-data` |
+| `update-group-block.yml` | Ansible playbook that installs the generated machine-group block in `/etc/group`; also run by the Hosts List Publish button |
+| `update-user-block.yml` | Ansible playbook that installs the generated user block in `/etc/passwd`; also run by the Users List publish button |
+| `Makefile` | Copies the PHP, CSV, generated block, and Ansible playbook files to `/var/www/html` and assigns them to `www-data:www-data` |
 
 ## Authentication
 
@@ -114,14 +116,83 @@ The dashboard can create two deployment-ready text blocks:
 
 | Button | Output | Format |
 | --- | --- | --- |
-| Hosts List → **Publish** | `hosts-block.txt` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
-| Users List → **Publish users-block.txt** | `users-block.txt` | `username:x:uid:gid:email:home-directory:/bin/bash` (`/etc/passwd` style) |
+| Hosts List → **Publish** | `hosts-block.txt` and remote `/etc/group` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
+| Users List → **Publish users-block.txt** | `users-block.txt` and remote `/etc/passwd` | `username:x:uid:gid:email:home-directory:/bin/bash` (`/etc/passwd` style) |
 
 After publishing, use **View Raw ...** to inspect the exact file or **Edit Raw ...** to make a direct authenticated edit. Editing a generated block does not update the source CSV, so source CSV changes should be made when the generated file needs to be regenerated.
 
+## Apply generated blocks with Ansible
+
+`update-group-block.yml` reads `hosts-block.txt` from the controller and uses
+`ansible.builtin.blockinfile` to replace one managed block in `/etc/group` on
+every host in the `virt` inventory group. `update-user-block.yml` performs the
+same operation for `users-block.txt` and `/etc/passwd`. Both playbooks run with
+privilege escalation, update one host at a time, and create a backup before
+changing each file.
+
+The generated block must contain `/etc/group`-format lines, for example:
+
+```text
+tom1-tsand-org:x:5000:ansible,sudo,tsandholm
+tom2-tsand-org:x:5001:ansible,sudo,mary,mikey,tsandholm
+```
+
+The Hosts List **Publish** button writes the current `hosts-block.txt` and then
+runs `update-group-block.yml` with `--diff`. The Users List **Publish
+users-block.txt** button writes the current `users-block.txt` and then runs
+`update-user-block.yml` with `--diff`. The web server account must be able to
+execute `ansible-playbook`, read both playbooks and block files, access the
+configured inventory, use SSH credentials, and escalate privileges on the
+managed hosts. Configure the inventory path with
+the `ANSIBLE_INVENTORY` environment variable; it defaults to
+`/etc/ansible/hosts`. Configure the executable with `ANSIBLE_PLAYBOOK`; it
+defaults to `/usr/bin/ansible-playbook`. Dashboard-triggered runs use
+`HOME=/tmp` and `ANSIBLE_LOCAL_TEMP=/tmp` so the `www-data` account does not
+need writable `/var/www/.ansible` or `/var/www/.ssh` directories. SSH uses
+`/tmp/csv-user-manager-known_hosts` with new host keys accepted automatically.
+The playbook connects as the `ansible` user by default instead of the
+`www-data` web account. Set `ANSIBLE_REMOTE_USER` to use a different remote
+account and set `ANSIBLE_PRIVATE_KEY` to an SSH private-key path readable by
+`www-data`; it defaults to `/var/www/.ssh/csv-user-manager_id_rsa`. This should
+be a dedicated key, not a personal controller key. Authorize its public key
+for the `ansible` account on every host in the `virt` group. The web server
+account still needs valid SSH credentials for the inventory hosts and
+permission to use privilege escalation.
+
+Run a dry run manually first, then apply the change:
+
+```sh
+ansible-playbook -i inventory update-group-block.yml --check --diff
+ansible-playbook -i inventory update-group-block.yml --diff
+```
+
+The playbook manages only the section between these markers and leaves all
+other `/etc/group` entries unchanged:
+
+```text
+# BEGIN CSV User Manager managed groups
+# END CSV User Manager managed groups
+```
+
+The Users List **Publish users-block.txt** button similarly writes the current
+user block and runs `update-user-block.yml` against the `virt` group. It replaces
+only the managed section between these markers in `/etc/passwd`:
+
+```text
+# BEGIN CSV User Manager managed users
+# END CSV User Manager managed users
+```
+
+The user playbook can also be run manually:
+
+```sh
+ansible-playbook -i inventory update-user-block.yml --check --diff
+ansible-playbook -i inventory update-user-block.yml --diff
+```
+
 ## Deploy
 
-Requires PHP, for example Apache with `mod_php` or PHP-FPM. The web server user must be able to read and write `index.php`, `view.php`, `users.csv`, and `hosts.csv`. It must also be able to create or update `hosts-block.txt` and `users-block.txt` when the publish or raw-edit actions are used.
+Requires PHP, for example Apache with `mod_php` or PHP-FPM. The web server user must be able to read and write `index.php`, `view.php`, `users.csv`, and `hosts.csv`. It must also be able to create or update `hosts-block.txt` and `users-block.txt`, read both Ansible playbooks, and execute `ansible-playbook` when publish actions are used.
 
 From this directory:
 
@@ -138,7 +209,9 @@ sudo cp users.csv /var/www/html
 sudo cp hosts.csv /var/www/html
 sudo cp hosts-block.txt /var/www/html
 sudo cp users-block.txt /var/www/html
-sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt
+sudo cp update-group-block.yml /var/www/html
+sudo cp update-user-block.yml /var/www/html
+sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt /var/www/html/update-group-block.yml /var/www/html/update-user-block.yml
 ```
 
 Then open `index.php` through the web server and sign in.

@@ -1,0 +1,40 @@
+---
+- name: Update the managed CSV User Manager groups
+  hosts: virt
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    group_file: /etc/group
+    group_block_file: "{{ playbook_dir }}/hosts-block.txt"
+    group_block_marker: "CSV User Manager managed groups"
+
+  pre_tasks:
+    - name: Read the generated group block from the controller
+      ansible.builtin.set_fact:
+        csv_user_manager_group_block: "{{ lookup('ansible.builtin.file', group_block_file) }}"
+      delegate_to: localhost
+      delegate_facts: true
+      become: false
+      run_once: true
+
+    - name: Ensure the generated group block is not empty
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].csv_user_manager_group_block | trim | length > 0
+        fail_msg: >-
+          {{ group_block_file }} is empty. Publish hosts-block.txt before
+          running this playbook.
+      become: false
+      run_once: true
+
+  tasks:
+    - name: Replace the managed group block in /etc/group
+      ansible.builtin.blockinfile:
+        path: "{{ group_file }}"
+        marker: "# {mark} {{ group_block_marker }}"
+        block: "{{ hostvars['localhost'].csv_user_manager_group_block | trim }}"
+        insertafter: EOF
+        create: false
+        backup: true

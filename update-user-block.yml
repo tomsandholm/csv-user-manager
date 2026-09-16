@@ -1,0 +1,40 @@
+---
+- name: Update the managed CSV User Manager users
+  hosts: virt
+  become: true
+  gather_facts: false
+  serial: 1
+
+  vars:
+    passwd_file: /etc/passwd
+    passwd_block_file: "{{ playbook_dir }}/users-block.txt"
+    passwd_block_marker: "CSV User Manager managed users"
+
+  pre_tasks:
+    - name: Read the generated user block from the controller
+      ansible.builtin.set_fact:
+        csv_user_manager_user_block: "{{ lookup('ansible.builtin.file', passwd_block_file) }}"
+      delegate_to: localhost
+      delegate_facts: true
+      become: false
+      run_once: true
+
+    - name: Ensure the generated user block is not empty
+      ansible.builtin.assert:
+        that:
+          - hostvars['localhost'].csv_user_manager_user_block | trim | length > 0
+        fail_msg: >-
+          {{ passwd_block_file }} is empty. Publish users-block.txt before
+          running this playbook.
+      become: false
+      run_once: true
+
+  tasks:
+    - name: Replace the managed user block in /etc/passwd
+      ansible.builtin.blockinfile:
+        path: "{{ passwd_file }}"
+        marker: "# {mark} {{ passwd_block_marker }}"
+        block: "{{ hostvars['localhost'].csv_user_manager_user_block | trim }}"
+        insertafter: EOF
+        create: false
+        backup: true
