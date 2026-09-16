@@ -9,7 +9,7 @@
     users_block_file: /var/www/html/users-block.txt
     users_csv_file: /var/www/html/users.csv
     source_home_prefix: /share/home
-    local_home_prefix: /shre/home
+    local_home_prefix: /share/home
 
   pre_tasks:
     - name: Read the generated users block from the controller

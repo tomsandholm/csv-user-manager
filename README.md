@@ -209,7 +209,7 @@ connection: local
 
 It reads usernames and home directories from `/var/www/html/users-block.txt`,
 matches each user to the public key in `/var/www/html/users.csv`, and maps source paths under
-`/share/home` to `/shre/home` on the controller. It creates each local
+`/share/home` to `/share/home` on the controller. It creates each local
 home directory and writes the key to `.ssh/authorized_keys`. Home directories use mode `0700`;
 `authorized_keys` uses mode `0600`. The local system must already contain each
 user and its primary group.
