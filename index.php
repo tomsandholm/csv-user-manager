@@ -280,6 +280,9 @@ function apply_hosts_block_with_ansible($playbook, $inventory) {
 
 // Write a /etc/passwd-format block from users.csv.
 function publish_users_block($csv_users, $output_file = 'users-block.txt') {
+    if (!is_readable($csv_users)) {
+        return false;
+    }
     $users = read_csv($csv_users, 7);
     $lines = [];
     foreach ($users as $user) {
@@ -293,12 +296,24 @@ function publish_users_block($csv_users, $output_file = 'users-block.txt') {
         $home_directory = trim($user[4] ?? '');
         $lines[] = $username . ':x:' . $uid . ':' . $gid . ':' . $email . ':' . $home_directory . ':/bin/bash';
     }
-    $content = $lines ? implode("\n", $lines) . "\n" : '';
-    if (($handle = fopen($output_file, 'w')) === FALSE) {
+    if (!$lines) {
         return false;
     }
-    fwrite($handle, $content);
+    $content = $lines ? implode("\n", $lines) . "\n" : '';
+    $temporary_file = $output_file . '.tmp.' . getmypid();
+    if (($handle = fopen($temporary_file, 'x')) === FALSE) {
+        return false;
+    }
+    if (fwrite($handle, $content) === false) {
+        fclose($handle);
+        unlink($temporary_file);
+        return false;
+    }
     fclose($handle);
+    if (!rename($temporary_file, $output_file)) {
+        unlink($temporary_file);
+        return false;
+    }
     return true;
 }
 

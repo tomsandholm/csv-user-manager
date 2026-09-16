@@ -86,6 +86,8 @@ When adding a machine-group, the form defaults Group ID to the next value after 
 - Publish, view, and edit raw `hosts-block.txt` and `users-block.txt` files
 - Generate `hosts-block.txt` in `/etc/group` format from `hosts.csv`
 - Generate `users-block.txt` in `/etc/passwd` format from `users.csv`
+- Refuse to publish an empty or unreadable `users.csv` as `users-block.txt`
+- Write generated user blocks atomically so a failed write cannot replace the existing file
 - Suggest the next available UID and GID for new users
 - Suggest the next available Group ID for new hosts, starting at `5000`
 - Create empty `users.csv` and `hosts.csv` files automatically if they are missing
@@ -120,6 +122,11 @@ The dashboard can create two deployment-ready text blocks:
 | Users List → **Publish users-block.txt** | `users-block.txt` and remote `/etc/passwd` | `username:x:uid:gid:email:home-directory:/bin/bash` (`/etc/passwd` style) |
 
 After publishing, use **View Raw ...** to inspect the exact file or **Edit Raw ...** to make a direct authenticated edit. Editing a generated block does not update the source CSV, so source CSV changes should be made when the generated file needs to be regenerated.
+
+User-block publishing requires a readable `users.csv` with at least one valid
+user row. The application writes the generated content to a temporary file and
+renames it into place only after the complete block has been written, preserving
+the previous `users-block.txt` if generation or writing fails.
 
 ## Apply generated blocks with Ansible
 

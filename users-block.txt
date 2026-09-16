@@ -1,0 +1,5 @@
+tsandholm:x:3000:3000:tom.sandholm@gmail.com:/share/home/tsandholm:/bin/bash
+kat:x:3001:3001:tom.sandholm@gmail.com:/share/home/kat:/bin/bash
+mary:x:3002:3002:tom.sandholm@gmail.com:/share/home/mary:/bin/bash
+mikey:x:3003:3003:tom.sandholm@gmail.com:/share/home/mikey:/bin/bash
+iggy:x:3004:3004:tom.sandholm@gmail.com:/share/home/iggy:/bin/bash
