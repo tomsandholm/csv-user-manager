@@ -17,6 +17,8 @@
         .list-scroll { height: 180px; overflow: auto; border: 1px solid #ddd; border-radius: 6px; margin-top: 6px; background: #fff; }
         .users-list-scroll { overflow-x: hidden; overflow-y: auto; }
         .hosts-list-scroll { height: 220px; overflow: auto; }
+        .users-list-scroll th, .users-list-scroll td,
+        .hosts-list-scroll th, .hosts-list-scroll td { font-size: 14px; }
         .search-row { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; }
         .search-row label { font-weight: bold; color: #495057; font-size: 12px; }
         .search-row input { flex: 1; max-width: 420px; padding: 5px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 12px; }
@@ -30,8 +32,9 @@
         tr:hover { background: #f8f9fc; }
         .alert { padding:10px; border-radius:4px; margin-bottom:15px; font-weight:bold; }
         .form-card h3 { margin: 0 0 8px 0 !important; padding-bottom: 5px !important; font-size: 15px; }
-        .users-list-wide h3, .panels-split > div > h3 { margin: 6px 0 !important; font-size: 15px; }
+        .list-heading { margin: 6px 0 !important; font-size: 15px !important; font-weight: bold; line-height: 1.2; }
         .users-list-wide > div:last-child, .panels-split > div > .list-scroll + div { margin-top: 6px !important; }
+        .users-list-wide > .search-row { margin-top: 14px; }
     </style>
 </head>
 <body>
@@ -98,7 +101,7 @@
                 </div>
                 <div class="users-list-wide">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                    <h3 style="margin: 1em 0;">Users List (users.csv)</h3>
+                    <h3 class="list-heading">Users List (users.csv)</h3>
                     <div style="display:flex; gap:8px;">
                         <a href="index.php?raw=users" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw CSV</a>
                         <a href="index.php?raw=users&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw CSV</a>
@@ -139,8 +142,14 @@
                         <input type="hidden" name="action" value="publish">
                         <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish users-block.txt</button>
                     </form>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <a href="index.php?raw=users-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw users-block.txt</a>
                     <a href="index.php?raw=users-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw users-block.txt</a>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                    <a href="index.php?raw=groups-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw groups-block.txt</a>
+                    <a href="index.php?raw=groups-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw groups-block.txt</a>
                 </div>
                 </div>
             </div>
@@ -164,7 +173,7 @@
                     </form>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-                    <h3 style="margin: 1em 0;">Hosts List (hosts.csv)</h3>
+                    <h3 class="list-heading">Hosts List (hosts.csv)</h3>
                     <div style="display:flex; gap:8px;">
                         <a href="index.php?raw=hosts" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw CSV</a>
                         <a href="index.php?raw=hosts&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw CSV</a>
@@ -182,7 +191,7 @@
                                 <tr>
                                     <td style="font-weight:bold; color:#2e59d9;"><?php echo htmlspecialchars($h[0]); ?></td>
                                     <td><span style="background:#e8f0fe; padding:2px 6px; border-radius:4px; font-family:monospace;"><?php echo htmlspecialchars($h[1]); ?></span></td>
-                                    <td style="font-size:13px; color:#555; max-width:200px; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($h[2]); ?>"><?php echo htmlspecialchars($h[2]); ?></td>
+                                    <td style="color:#555; max-width:200px; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($h[2]); ?>"><?php echo htmlspecialchars($h[2]); ?></td>
                                     <td style="white-space:nowrap;">
                                         <form method="POST" style="display:inline;"><input type="hidden" name="target_db" value="hosts"><input type="hidden" name="index" value="<?php echo $idx; ?>"><input type="hidden" name="action" value="edit"><button type="submit" style="background:#f6c23e; border:none; padding:4px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">Edit</button></form>
                                         <form method="POST" style="display:inline;" onsubmit="return confirm('Delete host?');"><input type="hidden" name="target_db" value="hosts"><input type="hidden" name="index" value="<?php echo $idx; ?>"><input type="hidden" name="action" value="delete"><button type="submit" style="background:#e74a3b; color:#fff; border:none; padding:4px 6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:11px;">Del</button></form>
@@ -197,8 +206,10 @@
                     <form method="POST">
                         <input type="hidden" name="target_db" value="hosts">
                         <input type="hidden" name="action" value="publish">
-                        <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish</button>
+                        <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish hosts-block.txt</button>
                     </form>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <a href="index.php?raw=hosts-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw hosts-block.txt</a>
                     <a href="index.php?raw=hosts-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw hosts-block.txt</a>
                 </div>

@@ -85,7 +85,7 @@ When adding a machine-group, the form defaults Group ID to the next value after 
 - Display calculated machine-group member lists with sticky headers and internal scrolling
 - Keep host membership lists synchronized after user or machine-group changes
 - View or edit raw `users.csv` and `hosts.csv` files
-- Publish, view, and edit raw `hosts-block.txt` and `users-block.txt` files
+- Publish, view, and edit raw `hosts-block.txt`, `users-block.txt`, and `groups-block.txt` files
 - Generate `hosts-block.txt` in `/etc/group` format from `hosts.csv`
 - Generate `users-block.txt` in `/etc/passwd` format from `users.csv`
 - Generate `groups-block.txt` in `/etc/group` format from `users-block.txt`
@@ -121,7 +121,7 @@ The dashboard can create two deployment-ready text blocks:
 
 | Button | Output | Format |
 | --- | --- | --- |
-| Hosts List → **Publish** | `hosts-block.txt` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
+| Hosts List → **Publish hosts-block.txt** | `hosts-block.txt` | `machine-group:x:group-id:member-list` (`/etc/group` style) |
 | Users List → **Publish users-block.txt** | `users-block.txt` and `groups-block.txt` | `username:x:uid:gid:email:home-directory:/bin/bash` plus `username:x:gid:` (`/etc/group` style) |
 
 After publishing, use **View Raw ...** to inspect the exact file or **Edit Raw ...** to make a direct authenticated edit. Editing a generated block does not update the source CSV, so source CSV changes should be made when the generated file needs to be regenerated.
@@ -132,7 +132,9 @@ renames it into place only after the complete block has been written, preserving
 the previous `users-block.txt` if generation or writing fails.
 The same publish action then derives `groups-block.txt` from the generated
 user block so each user's primary group name and GID are available for remote
-group creation.
+group creation. The Users List also provides **View Raw groups-block.txt** and
+**Edit Raw groups-block.txt** controls for authenticated direct inspection or
+editing.
 
 ## Apply generated blocks with Ansible
 
@@ -157,7 +159,8 @@ tom1-tsand-org:x:5000:ansible,sudo,tsandholm
 tom2-tsand-org:x:5001:ansible,sudo,mary,mikey,tsandholm
 ```
 
-The Hosts List **Publish** button writes only the current `hosts-block.txt`.
+The Hosts List **Publish hosts-block.txt** button writes only the current
+`hosts-block.txt`.
 The Users List **Publish users-block.txt** button writes only the current
 `users-block.txt`; neither button runs Ansible. To apply either block remotely,
 run the corresponding playbook manually. The web server account does not need
