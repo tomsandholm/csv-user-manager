@@ -93,9 +93,33 @@ if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-bloc
         exit;
     }
 
-    header('Content-Type: text/plain; charset=UTF-8');
-    header('Content-Disposition: inline; filename="' . $raw_filename . '"');
-    echo $raw_contents;
+    header('Content-Type: text/html; charset=UTF-8');
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>View <?php echo htmlspecialchars($raw_filename); ?></title>
+        <style>
+            body { font-family: sans-serif; margin: 24px; background: #f8f9fa; color: #333; }
+            main { max-width: 1100px; margin: 0 auto; }
+            pre { width: 100%; min-height: 420px; margin: 0; padding: 12px; box-sizing: border-box; overflow: auto; background: #fff; border: 1px solid #ced4da; border-radius: 4px; font: 14px monospace; white-space: pre-wrap; }
+            .actions { display: flex; gap: 10px; margin-top: 12px; }
+            .button { display: inline-block; padding: 9px 14px; border: 0; border-radius: 4px; background: #007bff; color: #fff; text-decoration: none; cursor: pointer; }
+            .secondary { background: #6c757d; }
+        </style>
+    </head>
+    <body>
+        <main>
+            <h1>View <?php echo htmlspecialchars($raw_filename); ?></h1>
+            <pre><?php echo htmlspecialchars($raw_contents); ?></pre>
+            <div class="actions">
+                <a class="button secondary" href="index.php">Back to Dashboard</a>
+            </div>
+        </main>
+    </body>
+    </html>
+    <?php
     exit;
 }
 
