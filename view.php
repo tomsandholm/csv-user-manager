@@ -9,8 +9,12 @@
         .box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; margin: 100px auto; }
         .panels-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px; }
         .users-list-wide { width: 100%; box-sizing: border-box; }
+        .user-management-card { padding: 12px; background: #fff; border: 2px solid #4e73df; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .host-management-card { padding: 12px; background: #fff; border: 2px solid #2e59d9; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .users-list-card { padding: 12px; background: #fff; border: 2px solid #4e73df; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .hosts-list-card { padding: 12px; background: #fff; border: 2px solid #2e59d9; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .management-heading { margin: 0 0 12px; color: #4e73df; font-size: 17px; }
+        .host-management-heading { margin: 0 0 12px; color: #2e59d9; font-size: 17px; }
         .form-card { background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 10px; }
         .user-form-card { border: 2px solid #4e73df; }
         .host-form-card { border: 2px solid #2e59d9; }
@@ -64,7 +68,8 @@
         
         <div class="panels-split">
             <!-- User management: the form supports both adding and editing rows. -->
-            <div>
+            <div class="user-management-card">
+                <h2 class="management-heading">User Management</h2>
                 <div class="form-card user-form-card">
                     <h3 style="margin:0 0 15px 0; color:#4e73df; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_user ? '📝 Edit User' : '➕ Add User'; ?></h3>
                     <form method="POST">
@@ -159,7 +164,8 @@
             </div>
 
             <!-- Host management: member-list is displayed but calculated by index.php. -->
-            <div>
+            <div class="host-management-card">
+                <h2 class="host-management-heading">Host Access Management</h2>
                 <div class="form-card host-form-card">
                     <h3 style="margin:0 0 15px 0; color:#2e59d9; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_host ? '📝 Edit Host Group' : '➕ Add New Host Group'; ?></h3>
                     <form method="POST">
