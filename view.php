@@ -9,7 +9,11 @@
         .box { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 280px; margin: 100px auto; }
         .panels-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px; }
         .users-list-wide { width: 100%; box-sizing: border-box; }
+        .users-list-card { padding: 12px; background: #fff; border: 2px solid #4e73df; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .hosts-list-card { padding: 12px; background: #fff; border: 2px solid #2e59d9; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .form-card { background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 10px; }
+        .user-form-card { border: 2px solid #4e73df; }
+        .host-form-card { border: 2px solid #2e59d9; }
         .form-row { display: flex; margin-bottom: 7px; align-items: center; }
         .form-row label { width: 125px; font-weight: bold; color: #495057; font-size: 12px; }
         .form-row input, .form-row textarea, .form-row select { flex: 1; padding: 5px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
@@ -61,7 +65,7 @@
         <div class="panels-split">
             <!-- User management: the form supports both adding and editing rows. -->
             <div>
-                <div class="form-card">
+                <div class="form-card user-form-card">
                     <h3 style="margin:0 0 15px 0; color:#4e73df; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_user ? '📝 Edit User' : '➕ Add User'; ?></h3>
                     <form method="POST">
                         <!-- These fields tell index.php which CSV and row to update. -->
@@ -99,7 +103,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="users-list-wide">
+                <div class="users-list-wide users-list-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
                     <h3 class="list-heading">Users List (users.csv)</h3>
                     <div style="display:flex; gap:8px;">
@@ -139,7 +143,7 @@
                 <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
                     <form method="POST">
                         <input type="hidden" name="target_db" value="users">
-                        <input type="hidden" name="action" value="publish">
+                        <input type="hidden" name="action" value="publish_users_block">
                         <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish users-block.txt</button>
                     </form>
                 </div>
@@ -156,7 +160,7 @@
 
             <!-- Host management: member-list is displayed but calculated by index.php. -->
             <div>
-                <div class="form-card">
+                <div class="form-card host-form-card">
                     <h3 style="margin:0 0 15px 0; color:#2e59d9; border-bottom:1px solid #ddd; padding-bottom:8px;"><?php echo $edit_host ? '📝 Edit Host Group' : '➕ Add New Host Group'; ?></h3>
                     <form method="POST">
                         <!-- These fields tell index.php which CSV and row to update. -->
@@ -172,6 +176,7 @@
                         </div>
                     </form>
                 </div>
+                <div class="hosts-list-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
                     <h3 class="list-heading">Hosts List (hosts.csv)</h3>
                     <div style="display:flex; gap:8px;">
@@ -205,13 +210,14 @@
                 <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
                     <form method="POST">
                         <input type="hidden" name="target_db" value="hosts">
-                        <input type="hidden" name="action" value="publish">
+                        <input type="hidden" name="action" value="publish_hosts_block">
                         <button type="submit" class="btn-sub" style="background:#2e59d9;">Publish hosts-block.txt</button>
                     </form>
                 </div>
                 <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <a href="index.php?raw=hosts-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw hosts-block.txt</a>
                     <a href="index.php?raw=hosts-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw hosts-block.txt</a>
+                </div>
                 </div>
             </div>
         </div>

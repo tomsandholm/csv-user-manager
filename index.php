@@ -78,12 +78,13 @@ if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-bloc
                 <h1>Edit <?php echo htmlspecialchars($raw_filename); ?></h1>
                 <?php if (!empty($save_message)): ?>
                     <div class="success"><?php echo htmlspecialchars($save_message); ?></div>
+                    <script>window.close();</script>
                 <?php endif; ?>
                 <form method="POST" action="index.php?raw=<?php echo htmlspecialchars($_GET['raw']); ?>&amp;edit=1">
                     <textarea name="raw_csv" spellcheck="false"><?php echo htmlspecialchars($raw_contents); ?></textarea>
                     <div class="actions">
                         <button class="button" type="submit">Save <?php echo htmlspecialchars($raw_filename); ?></button>
-                        <a class="button secondary" href="index.php">Back to Dashboard</a>
+                        <button class="button secondary" type="button" onclick="window.close();">Close Window</button>
                     </div>
                 </form>
             </main>
@@ -114,7 +115,7 @@ if (isset($_GET['raw']) && in_array($_GET['raw'], ['users', 'hosts', 'hosts-bloc
             <h1>View <?php echo htmlspecialchars($raw_filename); ?></h1>
             <pre><?php echo htmlspecialchars($raw_contents); ?></pre>
             <div class="actions">
-                <a class="button secondary" href="index.php">Back to Dashboard</a>
+                <button class="button secondary" type="button" onclick="window.close();">Close Window</button>
             </div>
         </main>
     </body>
@@ -218,46 +219,40 @@ function next_host_group_id($rows) {
     return (string)($highest + 1);
 }
 
-// Recalculate each host's member list from the current user authorized-host mappings.
-function sync_hosts_members($csv_users, $csv_hosts) {
-    $users = read_csv($csv_users, 7);
+// Update only the host memberships affected by one user's assignment change.
+function sync_user_host_members($csv_hosts, $username, $old_auth_host = '', $new_auth_host = '', $old_username = '') {
     $hosts = read_csv($csv_hosts, 3);
-    
-    // Build a lookup of users grouped by their selected host.
-    $host_mappings = [];
-    foreach ($users as $u) {
-        if (strtolower(trim($u[0] ?? '')) === 'username' || empty(trim($u[0] ?? ''))) continue;
-        $username = trim($u[0]);
-        $auth_host = trim($u[6]);
-        
-        if (!empty($auth_host)) {
-            $host_mappings[$auth_host][] = $username;
-        }
+    $username = trim($username);
+    $old_username = trim($old_username) !== '' ? trim($old_username) : $username;
+    $old_auth_host = trim($old_auth_host);
+    $new_auth_host = trim($new_auth_host);
+    if ($username === '') {
+        return false;
     }
-    
-    // Include both explicitly assigned users and users assigned to every host.
+    $assignment_changed = $old_username !== $username || $old_auth_host !== $new_auth_host;
+
     foreach ($hosts as $idx => $h) {
         if (strtolower(trim($h[0] ?? '')) === 'machine-group' || empty(trim($h[0] ?? ''))) continue;
         $machine_group = trim($h[0]);
-        
-        $members = [];
-        if (isset($host_mappings[$machine_group])) {
-            $members = array_merge($members, $host_mappings[$machine_group]);
-        }
-        if (isset($host_mappings['*'])) {
-            $members = array_merge($members, $host_mappings['*']);
-        }
-        
-        // Keep user members deterministic and duplicate-free, then put ansible and sudo first.
-        $members = array_unique($members);
-        sort($members);
-        $members = array_values(array_filter($members, function ($name) {
-            return $name !== 'ansible' && $name !== 'sudo';
+
+        $members = array_values(array_filter(array_map('trim', explode(',', (string)($h[2] ?? ''))), function ($member) {
+            return $member !== '';
         }));
-        $hosts[$idx][2] = implode(',', array_merge(['ansible', 'sudo'], $members));
+        $remove_user = $assignment_changed && ($old_auth_host === '*' || ($old_auth_host !== '' && $old_auth_host === $machine_group));
+        $add_user = $assignment_changed && ($new_auth_host === '*' || ($new_auth_host !== '' && $new_auth_host === $machine_group));
+
+        if ($remove_user) {
+            $members = array_values(array_filter($members, function ($member) use ($old_username) {
+                return $member !== $old_username;
+            }));
+        }
+        if ($add_user && !in_array($username, $members, true)) {
+            $members[] = $username;
+        }
+        $hosts[$idx][2] = implode(',', $members);
     }
-    
-    write_csv($csv_hosts, $hosts);
+
+    return write_csv($csv_hosts, $hosts);
 }
 
 // Write an /etc/group block from hosts.csv: machine-groupname:x:gid:member-list
@@ -366,13 +361,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
         $current_data = read_csv($csv_users, 7);
         // Delete the selected row, then refresh calculated host memberships.
         if ($action === 'delete' && $row_index >= 0) {
+            $deleted_user = $current_data[$row_index] ?? [];
             unset($current_data[$row_index]); $current_data = array_values($current_data);
             if (write_csv($csv_users, $current_data)) {
-                sync_hosts_members($csv_users, $csv_hosts);
+                sync_user_host_members($csv_hosts, $deleted_user[0] ?? '', $deleted_user[6] ?? '');
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>User deleted and hosts synced.</div>";
             }
         } 
         elseif ($action === 'save') {
+            $previous_user = $row_index >= 0 ? ($current_data[$row_index] ?? []) : [];
             // Replace the selected row when editing, or append a new row.
             $submitted_row = [
                 trim($_POST['username'] ?? ''), trim($_POST['uid'] ?? ''), trim($_POST['gid'] ?? ''),
@@ -389,12 +386,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             }
             if ($row_index >= 0) { $current_data[$row_index] = $submitted_row; } else { $current_data[] = $submitted_row; }
             if (write_csv($csv_users, $current_data)) {
-                sync_hosts_members($csv_users, $csv_hosts);
+                sync_user_host_members(
+                    $csv_hosts,
+                    $submitted_row[0],
+                    $previous_user[6] ?? '',
+                    $submitted_row[6],
+                    $previous_user[0] ?? ''
+                );
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>User saved and hosts synced.</div>";
             }
             $row_index = -1;
         }
-        elseif ($action === 'publish') {
+        elseif ($action === 'publish_users_block') {
             if (publish_users_block($csv_users) && publish_groups_block('users-block.txt')) {
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published users-block.txt and groups-block.txt.</div>";
             } else {
@@ -421,12 +424,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             }
             if ($row_index >= 0) { $current_data[$row_index] = $submitted_row; } else { $current_data[] = $submitted_row; }
             if (write_csv($csv_hosts, $current_data)) {
-                sync_hosts_members($csv_users, $csv_hosts);
-                $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Host saved and members synced from users database.</div>";
+                $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Host saved successfully.</div>";
             }
             $row_index = -1;
         }
-        elseif ($action === 'publish') {
+        elseif ($action === 'publish_hosts_block') {
             if (publish_hosts_block($csv_hosts)) {
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>Published hosts-block.txt.</div>";
             } else {
