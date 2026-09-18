@@ -22,14 +22,34 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 
 The dashboard requires an authenticated session before either CSV database is displayed or modified.
 
-The current credentials defined in `index.php` are:
+The current login credentials defined in `index.php` are:
 
 ```text
 Username: admin
 Password: secret123
 ```
 
-Change `ADMIN_USER` and `ADMIN_PASS` in `index.php` before deploying to a shared or production environment. Use the **Logout** link in the dashboard to end the session.
+The password is stored in `index.php` as a one-way hash in `ADMIN_PASS_HASH`
+and is checked with PHP's `password_verify()`. The plaintext password cannot be
+recovered from the hash. Change `ADMIN_USER` and `ADMIN_PASS_HASH` before
+deploying to a shared or production environment.
+
+Generate a new password hash from the command line with PHP:
+
+```sh
+php -r 'echo password_hash("replace-with-a-strong-password", PASSWORD_DEFAULT), PHP_EOL;'
+```
+
+Copy the generated value into `index.php`:
+
+```php
+define('ADMIN_PASS_HASH', '$2y$10$replace-this-with-the-generated-hash');
+```
+
+Use a strong password and do not commit or share the plaintext password. The
+hash includes a random salt, so generating a hash for the same password again
+will produce a different value. Use the **Logout** link in the dashboard to end
+the session.
 
 ## CSV formats
 

@@ -1,7 +1,7 @@
 <?php
 session_start();
 define('ADMIN_USER', 'admin');
-define('ADMIN_PASS', 'secret123');
+define('ADMIN_PASS_HASH', '$2y$10$vOxh6y0IozFAOOJBXczdBuvuhaxaNBhyYSNjUz5WYRYbByD4IqyOW');
 
 // Log out by clearing the session before redirecting back to the login page.
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
@@ -11,7 +11,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 $login_error = '';
 // Authenticate before exposing the dashboard or allowing CSV changes.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
-    if (trim($_POST['auth_user'] ?? '') === ADMIN_USER && trim($_POST['auth_pass'] ?? '') === ADMIN_PASS) {
+    if (trim($_POST['auth_user'] ?? '') === ADMIN_USER && password_verify((string)($_POST['auth_pass'] ?? ''), ADMIN_PASS_HASH)) {
         $_SESSION['authenticated'] = true; header("Location: index.php"); exit;
     } else { $login_error = "Invalid credentials."; }
 }
