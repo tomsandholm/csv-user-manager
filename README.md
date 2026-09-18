@@ -16,6 +16,8 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `update-group-block.yml` | Ansible playbook that manually installs the generated machine-group block in `/etc/group` |
 | `update-user-block.yml` | Ansible playbook that manually installs the generated user block in `/etc/passwd` |
 | `setup-local-user-homes.yml` | Local-only Ansible playbook that creates user home directories and installs public keys |
+| `sshd_allow_group.yml` | Ansible playbook that allows each host's machine-group to authenticate through SSH |
+| `sshd_unallow_group.yml` | Ansible playbook that removes each host's machine-group from SSH access while retaining administrative access |
 | `Makefile` | Copies the PHP, CSV, generated block, and Ansible playbook files to `/var/www/html` and assigns them to `www-data:www-data` |
 
 ## Authentication
@@ -160,7 +162,7 @@ editing.
 
 The playbooks read their input files from `/var/www/html` on the Ansible
 controller, where `make push` deploys the CSV and block files.
-The repository contains three manual Ansible playbooks. None is launched by a
+The repository contains five manual Ansible playbooks. None is launched by a
 dashboard Publish button.
 
 | Playbook | Target | Purpose |
@@ -168,12 +170,15 @@ dashboard Publish button.
 | `update-group-block.yml` | Remote `virt` hosts | Reads `/var/www/html/hosts-block.txt` on the controller and replaces the managed CSV User Manager section in `/etc/group`. |
 | `update-user-block.yml` | Remote `virt` hosts | Reads `/var/www/html/users-block.txt` and `/var/www/html/groups-block.txt`, creates each user's primary group with its generated GID, replaces the managed section in `/etc/passwd`, and runs `pwconv`. |
 | `setup-local-user-homes.yml` | Controller `localhost` only | Reads `/var/www/html/users-block.txt` and `/var/www/html/users.csv`, creates local home directories under `/share/home`, installs each public key in `.ssh/authorized_keys`, and applies ownership and permissions. |
+| `sshd_allow_group.yml` | Remote `virt` hosts | Ensures the host machine-group exists and adds it to `/etc/ssh/sshd_config`'s `AllowGroups` directive, then validates and restarts SSH. |
+| `sshd_unallow_group.yml` | Remote `virt` hosts | Removes the host machine-group from SSH login access by restoring `AllowGroups ansible sudo`, then validates and restarts SSH. |
 
-The first two playbooks use `become: true`, run one remote host at a time,
-and create backups when changing `/etc/group` or `/etc/passwd`. The home setup
-playbook uses `hosts: localhost` and `connection: local`; it never connects to
-the remote `virt` hosts. Local user accounts and their primary groups must
-already exist before running the home setup playbook.
+The remote playbooks use `become: true`, and the block-update playbooks run one
+remote host at a time while creating backups when changing `/etc/group` or
+`/etc/passwd`. The home setup playbook uses `hosts: localhost` and
+`connection: local`; it never connects to the remote `virt` hosts. Local user
+accounts and their primary groups must already exist before running the home
+setup playbook.
 
 ## Recommended usage order
 
@@ -185,12 +190,44 @@ Run the workflow in this order whenever the CSV data changes:
 4. Deploy the current files to the controller path with `make push` if the source files were changed in the repository. When the dashboard is already running from `/var/www/html`, its Publish actions write the deployed block files there directly.
 5. Run `update-group-block.yml` to apply machine-groups.
 6. Run `update-user-block.yml` to create primary groups, update users, and run `pwconv`.
-7. Run `setup-local-user-homes.yml` on the controller to create local homes and install keys.
+7. Run `sshd_allow_group.yml` to allow the host machine-group to log in through SSH.
+8. Run `setup-local-user-homes.yml` on the controller to create local homes and install keys.
 
 The home setup playbook can be run before or after the two remote playbooks as
 long as the local accounts and groups already exist. Running the remote group
 playbook before the remote user playbook is recommended because it establishes
-the machine-group entries first.
+the machine-group entries first. Run `sshd_unallow_group.yml` when a host
+machine-group should no longer be permitted to log in through SSH.
+
+### SSH login control with `AllowGroups`
+
+The OpenSSH `AllowGroups` directive is the access-control boundary for SSH
+login. A user can log in to a system only when at least one of the user's
+groups is listed in that system's `AllowGroups` directive. In this project,
+`sshd_allow_group.yml` adds the host-specific machine-group, for example:
+
+```text
+AllowGroups ansible sudo tom1-tsand-org
+```
+
+That means members of `tom1-tsand-org` can log in to `tom1.tsand.org`, while
+members of another host group are not granted access there. The `ansible` and
+`sudo` groups remain listed so administrative access is retained. This is how
+the project controls which system a user can log in to: the user's
+`authorized-host` assignment determines host-group membership, and
+`AllowGroups` enforces that membership at the SSH daemon.
+
+To revoke the machine-group's SSH access without removing administrative
+access, run:
+
+```sh
+ansible-playbook -i inventory sshd_unallow_group.yml --check --diff
+ansible-playbook -i inventory sshd_unallow_group.yml --diff
+```
+
+Both SSHD playbooks validate the temporary configuration with `sshd -t` before
+restarting the SSH service. Keep an existing administrative session open while
+changing SSH access so a configuration mistake does not lock out the operator.
 
 The generated block must contain `/etc/group`-format lines, for example:
 
@@ -254,6 +291,8 @@ ansible-playbook -i inventory update-group-block.yml --check --diff
 ansible-playbook -i inventory update-group-block.yml --diff
 ansible-playbook -i inventory update-user-block.yml --check --diff
 ansible-playbook -i inventory update-user-block.yml --diff
+ansible-playbook -i inventory sshd_allow_group.yml --check --diff
+ansible-playbook -i inventory sshd_allow_group.yml --diff
 ```
 
 ## Create local user homes and SSH access
@@ -307,7 +346,11 @@ ansible-playbook -i inventory update-group-block.yml --diff
 ansible-playbook -i inventory update-user-block.yml --check --diff
 ansible-playbook -i inventory update-user-block.yml --diff
 
-# 5. Preview and apply local homes and SSH authorized keys on the controller.
+# 5. Preview and apply SSH login group access on the remote virt hosts.
+ansible-playbook -i inventory sshd_allow_group.yml --check --diff
+ansible-playbook -i inventory sshd_allow_group.yml --diff
+
+# 6. Preview and apply local homes and SSH authorized keys on the controller.
 ansible-playbook -i localhost, setup-local-user-homes.yml --check --diff
 ansible-playbook -i localhost, setup-local-user-homes.yml
 ```
@@ -337,7 +380,9 @@ sudo cp groups-block.txt /var/www/html
 sudo cp update-group-block.yml /var/www/html
 sudo cp update-user-block.yml /var/www/html
 sudo cp setup-local-user-homes.yml /var/www/html
-sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt /var/www/html/groups-block.txt /var/www/html/update-group-block.yml /var/www/html/update-user-block.yml /var/www/html/setup-local-user-homes.yml
+sudo cp sshd_allow_group.yml /var/www/html
+sudo cp sshd_unallow_group.yml /var/www/html
+sudo chown www-data:www-data /var/www/html/index.php /var/www/html/view.php /var/www/html/users.csv /var/www/html/hosts.csv /var/www/html/hosts-block.txt /var/www/html/users-block.txt /var/www/html/groups-block.txt /var/www/html/update-group-block.yml /var/www/html/update-user-block.yml /var/www/html/setup-local-user-homes.yml /var/www/html/sshd_allow_group.yml /var/www/html/sshd_unallow_group.yml
 ```
 
 Then open `index.php` through the web server and sign in. Publishing from the

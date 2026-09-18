@@ -1,22 +1,22 @@
 ---
-- name: Configure SSH AllowGroups based on Hostname Match
+- name: Allow the host group to log in through SSH
   hosts: virt
   become: true
   vars:
-    # Converts '://example.com' to 'target-example-com'
+    # Converts a host such as tom1.tsand.org to tom1-tsand-org.
     machine_groupname: "{{ inventory_hostname | replace('.', '-') }}"
 
   tasks:
-    - name: Ensure the new group exists
+    - name: Ensure the host access group exists
       ansible.builtin.group:
         name: "{{ machine_groupname }}"
-    - name: Ensure AllowGroups directive contains the machine group name
+    - name: Allow the host group to authenticate through SSH
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         state: present
         regexp: '^AllowGroups(?:\s+|$)'
         line: "AllowGroups ansible sudo {{ machine_groupname }}"
-      # This task will only run on the machine that matches your target name
+        validate: '/usr/sbin/sshd -t -f %s'
       notify: Restart sshd
 
   handlers:
@@ -24,4 +24,3 @@
       ansible.builtin.service:
         name: ssh
         state: restarted
-
