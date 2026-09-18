@@ -82,6 +82,10 @@ def add_textbox(slide, text, x, y, w, h, size=20, color=(40, 40, 40), bold=False
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.word_wrap = True
+    tf.margin_left = 0
+    tf.margin_right = 0
+    tf.margin_top = 0
+    tf.margin_bottom = 0
     p = tf.paragraphs[0]
     p.text = text
     p.font.name = "Aptos"
@@ -106,7 +110,7 @@ def add_card(slide, x, y, w, h, heading, body, color=BLUE):
     shape.fill.solid(); shape.fill.fore_color.rgb = RGBColor(255, 255, 255)
     shape.line.color.rgb = RGBColor(*color); shape.line.width = Pt(1.5)
     add_textbox(slide, heading, x + 0.18, y + 0.15, w - 0.35, 0.35, 18, color, True)
-    add_textbox(slide, body, x + 0.18, y + 0.62, w - 0.35, h - 0.75, 14, (65, 65, 65))
+    add_textbox(slide, body, x + 0.18, y + 0.62, w - 0.35, h - 0.75, 13, (65, 65, 65))
 
 dashboard_image()
 prs = Presentation()
@@ -127,12 +131,12 @@ slide = prs.slides.add_slide(blank); title(slide, "Dashboard at a glance", "The 
 slide.shapes.add_picture(str(SCREENSHOT), Inches(0.55), Inches(1.35), width=Inches(12.25))
 
 slide = prs.slides.add_slide(blank); title(slide, "Core features")
-add_card(slide, 0.7, 1.35, 3.8, 1.55, "User management", "Add, edit, delete, search, and inspect complete user records. Assign a specific Auth Host or all hosts.", BLUE)
-add_card(slide, 4.8, 1.35, 3.8, 1.55, "Host management", "Maintain machine-groups, IDs, and member lists while preserving existing members during targeted updates.", HOST_BLUE)
-add_card(slide, 8.9, 1.35, 3.8, 1.55, "Raw file controls", "View or edit source CSVs and generated blocks in authenticated, readable pages.", BLUE)
-add_card(slide, 0.7, 3.35, 3.8, 1.55, "Safe publishing", "Publish hosts-block.txt separately from users-block.txt and groups-block.txt; publishing never runs Ansible.", HOST_BLUE)
-add_card(slide, 4.8, 3.35, 3.8, 1.55, "Operational safeguards", "Password hashing, locked raw-file writes, escaped output, atomic user-block generation, and backups.", BLUE)
-add_card(slide, 8.9, 3.35, 3.8, 1.55, "Usable layout", "Side-by-side management areas, searchable lists, internal list scrolling, and page-level scrolling.", HOST_BLUE)
+add_card(slide, 0.7, 1.35, 3.8, 1.7, "User management", "Add, edit, delete, search, and inspect complete user records. Assign a specific Auth Host or all hosts.", BLUE)
+add_card(slide, 4.8, 1.35, 3.8, 1.7, "Host management", "Maintain machine-groups, IDs, and member lists while preserving existing members during targeted updates.", HOST_BLUE)
+add_card(slide, 8.9, 1.35, 3.8, 1.7, "Raw file controls", "View or edit source CSVs and generated blocks in authenticated, readable pages.", BLUE)
+add_card(slide, 0.7, 3.45, 3.8, 1.7, "Safe publishing", "Publish hosts-block.txt separately from users-block.txt and groups-block.txt; publishing never runs Ansible.", HOST_BLUE)
+add_card(slide, 4.8, 3.45, 3.8, 1.7, "Operational safeguards", "Password hashing, locked raw-file writes, escaped output, atomic user-block generation, and backups.", BLUE)
+add_card(slide, 8.9, 3.45, 3.8, 1.7, "Usable layout", "Side-by-side management areas, searchable lists, internal list scrolling, and page-level scrolling.", HOST_BLUE)
 
 slide = prs.slides.add_slide(blank); title(slide, "Project structure", "Small, explicit files keep the application easy to deploy and understand.")
 add_card(slide, 0.7, 1.35, 3.8, 2.0, "Web application", "`index.php` handles authentication, CSV operations, synchronization, publishing, and raw views. `view.php` renders the dashboard.", BLUE)
