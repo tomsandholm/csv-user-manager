@@ -16,7 +16,7 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `update-group-block.yml` | Ansible playbook that manually installs the generated machine-group block in `/etc/group` |
 | `update-user-block.yml` | Ansible playbook that manually installs the generated user block in `/etc/passwd` |
 | `setup-local-user-homes.yml` | Local-only Ansible playbook that creates user home directories and installs public keys |
-| `sshd_allow_group.yml` | Ansible playbook that allows each host's machine-group to authenticate through SSH |
+| `sshd_allow_group.yml` | One-time setup playbook that allows each host's machine-group to authenticate through SSH |
 | `sshd_unallow_group.yml` | Ansible playbook that removes each host's machine-group from SSH access while retaining administrative access |
 | `Makefile` | Copies the PHP, CSV, generated block, and Ansible playbook files to `/var/www/html` and assigns them to `www-data:www-data` |
 
@@ -170,7 +170,7 @@ dashboard Publish button.
 | `update-group-block.yml` | Remote `virt` hosts | Reads `/var/www/html/hosts-block.txt` on the controller and replaces the managed CSV User Manager section in `/etc/group`. |
 | `update-user-block.yml` | Remote `virt` hosts | Reads `/var/www/html/users-block.txt` and `/var/www/html/groups-block.txt`, creates each user's primary group with its generated GID, replaces the managed section in `/etc/passwd`, and runs `pwconv`. |
 | `setup-local-user-homes.yml` | Controller `localhost` only | Reads `/var/www/html/users-block.txt` and `/var/www/html/users.csv`, creates local home directories under `/share/home`, installs each public key in `.ssh/authorized_keys`, and applies ownership and permissions. |
-| `sshd_allow_group.yml` | Remote `virt` hosts | Ensures the host machine-group exists and adds it to `/etc/ssh/sshd_config`'s `AllowGroups` directive, then validates and restarts SSH. |
+| `sshd_allow_group.yml` | Remote `virt` hosts | One-time setup: adds the host machine-group to `/etc/ssh/sshd_config`'s `AllowGroups` directive, then validates and restarts SSH. |
 | `sshd_unallow_group.yml` | Remote `virt` hosts | Removes the host machine-group from SSH login access by restoring `AllowGroups ansible sudo`, then validates and restarts SSH. |
 
 The remote playbooks use `become: true`, and the block-update playbooks run one
@@ -182,7 +182,7 @@ setup playbook.
 
 ## Recommended usage order
 
-Run the workflow in this order whenever the CSV data changes:
+Run the initial setup in this order:
 
 1. Edit or save `users.csv` and `hosts.csv` in the dashboard.
 2. In **Hosts List**, click **Publish hosts-block.txt**.
@@ -190,14 +190,20 @@ Run the workflow in this order whenever the CSV data changes:
 4. Deploy the current files to the controller path with `make push` if the source files were changed in the repository. When the dashboard is already running from `/var/www/html`, its Publish actions write the deployed block files there directly.
 5. Run `update-group-block.yml` to apply machine-groups.
 6. Run `update-user-block.yml` to create primary groups, update users, and run `pwconv`.
-7. Run `sshd_allow_group.yml` to allow the host machine-group to log in through SSH.
+7. Run `sshd_allow_group.yml` once to allow the host machine-group to log in through SSH.
 8. Run `setup-local-user-homes.yml` on the controller to create local homes and install keys.
+
+After initial setup, do not run `sshd_allow_group.yml` for every CSV change. Run
+it again only when the SSH `AllowGroups` configuration itself needs to be
+recreated or repaired. Routine CSV synchronization uses
+`update-group-block.yml`, `update-user-block.yml`, and
+`setup-local-user-homes.yml`. Use `sshd_unallow_group.yml` when a host
+machine-group should no longer be permitted to log in through SSH.
 
 The home setup playbook can be run before or after the two remote playbooks as
 long as the local accounts and groups already exist. Running the remote group
 playbook before the remote user playbook is recommended because it establishes
-the machine-group entries first. Run `sshd_unallow_group.yml` when a host
-machine-group should no longer be permitted to log in through SSH.
+the machine-group entries first.
 
 ### SSH login control with `AllowGroups`
 
