@@ -186,7 +186,7 @@ if (isset($_GET['user_detail']) && ctype_digit((string)$_GET['user_detail'])) {
                         <dd><?php echo htmlspecialchars($detail_user[$detail_field] ?? ''); ?></dd>
                     <?php endforeach; ?>
                 </dl>
-                <a class="button" href="index.php">Back to Dashboard</a>
+                <button class="button" type="button" onclick="window.close();">Close Window</button>
             </div>
         </main>
     </body>
