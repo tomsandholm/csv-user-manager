@@ -160,7 +160,7 @@ for i, (n, head, body) in enumerate(steps):
 slide = prs.slides.add_slide(blank); title(slide, "Ansible playbooks and order", "Run as user `ansible` from the controller; preview with `--check --diff` first.")
 add_card(slide, 0.7, 1.35, 3.75, 3.8, "1. update-group-block.yml", "Target: remote `virt` hosts\n\nReads `hosts-block.txt` and updates the managed section of `/etc/group` with backups and privilege escalation.", HOST_BLUE)
 add_card(slide, 4.8, 1.35, 3.75, 3.8, "2. update-user-block.yml", "Target: remote `virt` hosts\n\nCreates primary groups, updates the managed `/etc/passwd` section, and runs `pwconv`.", BLUE)
-add_card(slide, 8.9, 1.35, 3.75, 3.8, "3. setup-local-user-homes.yml", "Target: `localhost` only\n\nCreates `/share/home` directories and `.ssh/authorized_keys` with correct ownership and permissions.", HOST_BLUE)
+add_card(slide, 8.9, 1.35, 3.75, 3.8, "3. Local homes and keys", "Playbook: `setup-local-user-homes.yml`\n\nTarget: `localhost` only\n\nCreates `/share/home` directories and `.ssh/authorized_keys` with correct ownership and permissions.", HOST_BLUE)
 add_textbox(slide, "Recommended order (run as user ansible):\nupdate-group-block.yml  ->  update-user-block.yml  ->  setup-local-user-homes.yml", 0.85, 5.72, 11.7, 0.72, 15, NAVY, True)
 
 slide = prs.slides.add_slide(blank); title(slide, "Advantages and operating principles")
