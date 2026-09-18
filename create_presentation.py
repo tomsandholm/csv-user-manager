@@ -97,9 +97,9 @@ def title(slide, text, subtitle=None):
     if subtitle:
         add_textbox(slide, subtitle, 0.62, 0.95, 12, 0.35, 13, GRAY)
 
-def bullets(slide, items, x=0.9, y=1.5, w=11.3, size=21, gap=0.48):
+def bullets(slide, items, x=0.9, y=1.5, w=11.3, size=21, gap=0.75):
     for i, item in enumerate(items):
-        add_textbox(slide, "\u2022 " + item, x, y + i * gap, w, 0.38, size, (55, 55, 55))
+        add_textbox(slide, "\u2022 " + item, x, y + i * gap, w, 0.62, size, (55, 55, 55))
 
 def add_card(slide, x, y, w, h, heading, body, color=BLUE):
     shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
