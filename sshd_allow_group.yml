@@ -7,9 +7,6 @@
     machine_groupname: "{{ inventory_hostname | replace('.', '-') }}"
 
   tasks:
-    - name: Ensure the host access group exists
-      ansible.builtin.group:
-        name: "{{ machine_groupname }}"
     - name: Allow the host group to authenticate through SSH
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
