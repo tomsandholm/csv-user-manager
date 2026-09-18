@@ -101,9 +101,9 @@ def title(slide, text, subtitle=None):
     if subtitle:
         add_textbox(slide, subtitle, 0.62, 0.95, 12, 0.35, 13, GRAY)
 
-def bullets(slide, items, x=0.9, y=1.5, w=11.3, size=21, gap=0.75):
+def bullets(slide, items, x=0.9, y=1.5, w=11.3, size=21, gap=0.82):
     for i, item in enumerate(items):
-        add_textbox(slide, "\u2022 " + item, x, y + i * gap, w, 0.62, size, (55, 55, 55))
+        add_textbox(slide, "\u2022 " + item, x, y + i * gap, w, 0.76, size, (55, 55, 55))
 
 def add_card(slide, x, y, w, h, heading, body, color=BLUE):
     shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(x), Inches(y), Inches(w), Inches(h))
@@ -161,7 +161,7 @@ slide = prs.slides.add_slide(blank); title(slide, "Ansible playbooks and order",
 add_card(slide, 0.7, 1.35, 3.75, 3.8, "1. update-group-block.yml", "Target: remote `virt` hosts\n\nReads `hosts-block.txt` and updates the managed section of `/etc/group` with backups and privilege escalation.", HOST_BLUE)
 add_card(slide, 4.8, 1.35, 3.75, 3.8, "2. update-user-block.yml", "Target: remote `virt` hosts\n\nCreates primary groups, updates the managed `/etc/passwd` section, and runs `pwconv`.", BLUE)
 add_card(slide, 8.9, 1.35, 3.75, 3.8, "3. setup-local-user-homes.yml", "Target: `localhost` only\n\nCreates `/share/home` directories and `.ssh/authorized_keys` with correct ownership and permissions.", HOST_BLUE)
-add_textbox(slide, "Recommended commands: ansible-playbook -i inventory update-group-block.yml --check --diff  →  apply  →  update-user-block.yml  →  setup-local-user-homes.yml", 0.85, 5.75, 11.7, 0.65, 15, NAVY, True)
+add_textbox(slide, "Recommended order (run as user ansible):\nupdate-group-block.yml  ->  update-user-block.yml  ->  setup-local-user-homes.yml", 0.85, 5.72, 11.7, 0.72, 15, NAVY, True)
 
 slide = prs.slides.add_slide(blank); title(slide, "Advantages and operating principles")
 bullets(slide, ["Simple deployment model: PHP, CSV, generated blocks, and playbooks can live in `/var/www/html`.", "Human-readable inputs support review, backup, and straightforward recovery.", "Manual Ansible execution keeps production changes intentional and observable.", "Targeted host synchronization preserves unrelated members instead of rebuilding lists.", "Generated files use standard `/etc/passwd` and `/etc/group` formats.", "Authentication and one-way password hashing protect dashboard access."])
