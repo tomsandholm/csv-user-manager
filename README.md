@@ -13,7 +13,7 @@ A small authenticated PHP web dashboard for managing users and machine-groups st
 | `groups-block.txt` | Generated `/etc/group`-format primary user groups; created with `users-block.txt` |
 | `hosts.csv` | Host records and calculated comma-separated member lists |
 | `hosts-block.txt` | Generated `/etc/group`-format machine-group entries; created by the Hosts List publish action |
-| `update-group-block.yml` | Ansible playbook that manually installs the generated machine-group block in `/etc/group` |
+| `update-group-block.yml` | Ansible playbook that manually combines the generated host and user group blocks and installs them in `/etc/group` |
 | `update-user-block.yml` | Ansible playbook that manually installs the generated user block in `/etc/passwd` |
 | `setup-local-user-homes.yml` | Local-only Ansible playbook that creates user home directories and installs public keys |
 | `sshd_allow_group.yml` | One-time setup playbook that allows each host's machine-group to authenticate through SSH |
@@ -167,7 +167,7 @@ dashboard Publish button.
 
 | Playbook | Target | Purpose |
 | --- | --- | --- |
-| `update-group-block.yml` | Remote `virt` hosts | Reads `/var/www/html/hosts-block.txt` on the controller and replaces the managed CSV User Manager section in `/etc/group`. |
+| `update-group-block.yml` | Remote `virt` hosts | Reads `/var/www/html/hosts-block.txt` and `/var/www/html/groups-block.txt` on the controller, combines them, and replaces the managed CSV User Manager section in `/etc/group`. |
 | `update-user-block.yml` | Remote `virt` hosts | Reads `/var/www/html/users-block.txt` and `/var/www/html/groups-block.txt`, creates each user's primary group with its generated GID, replaces the managed section in `/etc/passwd`, and runs `pwconv`. |
 | `setup-local-user-homes.yml` | Controller `localhost` only | Reads `/var/www/html/users-block.txt` and `/var/www/html/users.csv`, creates local home directories under `/share/home`, installs each public key in `.ssh/authorized_keys`, and applies ownership and permissions. |
 | `sshd_allow_group.yml` | Remote `virt` hosts | One-time setup: adds the host machine-group to `/etc/ssh/sshd_config`'s `AllowGroups` directive, then validates and restarts SSH. |
@@ -188,7 +188,7 @@ Run the initial setup in this order:
 2. In **Hosts List**, click **Publish hosts-block.txt**.
 3. In **Users List**, click **Publish users-block.txt**. This also creates `groups-block.txt`.
 4. Deploy the current files to the controller path with `make push` if the source files were changed in the repository. When the dashboard is already running from `/var/www/html`, its Publish actions write the deployed block files there directly.
-5. Run `update-group-block.yml` to apply machine-groups.
+5. Run `update-group-block.yml` to apply machine-groups and primary user groups to `/etc/group`.
 6. Run `update-user-block.yml` to create primary groups, update users, and run `pwconv`.
 7. Run `sshd_allow_group.yml` once to allow the host machine-group to log in through SSH.
 8. Run `setup-local-user-homes.yml` on the controller to create local homes and install keys.
@@ -235,21 +235,28 @@ Both SSHD playbooks validate the temporary configuration with `sshd -t` before
 restarting the SSH service. Keep an existing administrative session open while
 changing SSH access so a configuration mistake does not lock out the operator.
 
-The generated block must contain `/etc/group`-format lines, for example:
+`update-group-block.yml` combines the host machine-group entries from
+`hosts-block.txt` with the primary user-group entries from `groups-block.txt`
+and inserts both as one managed block in `/etc/group`. Both files must be
+published before running the playbook. The combined block contains
+`/etc/group`-format lines, for example:
 
 ```text
 tom1-tsand-org:x:5000:ansible,sudo,tsandholm
 tom2-tsand-org:x:5001:ansible,sudo,mary,mikey,tsandholm
+tsandholm:x:3000:
+mary:x:3002:
 ```
 
 The Hosts List **Publish hosts-block.txt** button writes only the current
 `hosts-block.txt`.
 The Users List **Publish users-block.txt** button writes only the current
-`users-block.txt`; neither button runs Ansible. To apply either block remotely,
-run the corresponding playbook manually. The web server account does not need
-to execute Ansible for publishing. Manual playbook runs require access to both
-playbooks and block files, the configured inventory, SSH credentials, and
-privilege escalation on the managed hosts.
+`users-block.txt` and derives `groups-block.txt`; neither button runs Ansible.
+To apply the combined group block remotely, run `update-group-block.yml`
+manually. The web server account does not need to execute Ansible for
+publishing. Manual playbook runs require access to the playbooks and block
+files, the configured inventory, SSH credentials, and privilege escalation on
+the managed hosts.
 
 Run a dry run manually first, then apply the change:
 
@@ -265,8 +272,8 @@ ansible-playbook -i inventory update-group-block.yml --limit tom1.tsand.org --ch
 ansible-playbook -i inventory update-group-block.yml --limit tom1.tsand.org --diff
 ```
 
-The playbook manages only the section between these markers and leaves all
-other `/etc/group` entries unchanged:
+The playbook manages only the combined section between these markers and
+leaves all other `/etc/group` entries unchanged:
 
 ```text
 # BEGIN CSV User Manager managed groups
