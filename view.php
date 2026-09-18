@@ -15,6 +15,10 @@
         .hosts-list-card { padding: 12px; background: #fff; border: 2px solid #2e59d9; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .management-heading { margin: 0 0 12px; color: #4e73df; font-size: 17px; }
         .host-management-heading { margin: 0 0 12px; color: #2e59d9; font-size: 17px; }
+        .next-step-card { margin-top: 12px; padding: 12px; background: #f8f9fc; border: 1px solid #2e59d9; border-radius: 6px; color: #333; }
+        .next-step-card h3 { margin: 0 0 8px; color: #2e59d9; font-size: 15px; }
+        .next-step-card ol { margin: 0 0 0 20px; padding: 0; }
+        .next-step-card code { font-family: monospace; font-size: 13px; }
         .form-card { background: #fff; padding: 12px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #ddd; margin-bottom: 10px; }
         .user-form-card { border: 2px solid #4e73df; }
         .host-form-card { border: 2px solid #2e59d9; }
@@ -224,6 +228,15 @@
                     <a href="index.php?raw=hosts-block" target="_blank" rel="noopener" class="btn-sub" style="background:#6c757d; text-decoration:none;">View Raw hosts-block.txt</a>
                     <a href="index.php?raw=hosts-block&amp;edit=1" target="_blank" rel="noopener" class="btn-sub" style="background:#2e59d9; text-decoration:none;">Edit Raw hosts-block.txt</a>
                 </div>
+                </div>
+                <div class="next-step-card">
+                    <h3>Next Step: Run Ansible Playbooks</h3>
+                    <div>As user <code>ansible</code>, run the playbooks in this order:</div>
+                    <ol>
+                        <li><code>update-group-block.yml</code></li>
+                        <li><code>update-user-block.yml</code></li>
+                        <li><code>setup-local-user-homes.yml</code></li>
+                    </ol>
                 </div>
             </div>
         </div>
