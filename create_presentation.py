@@ -56,7 +56,14 @@ def dashboard_image():
             d.text((x, y), value, fill=(55, 55, 55), font=font(14))
         d.rounded_rectangle((650, y - 3, 730, y + 22), 4, fill=(23, 162, 184))
         d.text((666, y + 2), "View", fill="white", font=font(12, True))
+        d.rounded_rectangle((570, y - 3, 645, y + 22), 4, fill=(246, 194, 62))
+        d.text((586, y + 2), "Edit", fill=(55, 55, 55), font=font(12, True))
         y += 42
+    d.text((72, 720), "Block controls", fill=BLUE, font=font(14, True))
+    for x, label, color in [(190, "Publish", (46, 89, 217)), (285, "View", (108, 117, 125)), (365, "Edit", (46, 89, 217))]:
+        d.rounded_rectangle((x, 716, x + 72, 744), 4, fill=color)
+        d.text((x + 12, 722), label, fill="white", font=font(12, True))
+    d.text((455, 720), "users-block.txt / groups-block.txt", fill=GRAY, font=font(12))
     d.rounded_rectangle((842, 135, 1548, 390), 8, fill="white", outline=HOST_BLUE, width=3)
     d.text((862, 150), "Add New Host Group", fill=HOST_BLUE, font=font(21, True))
     for i, label in enumerate(["Machine-Group", "Group ID", "Member List"]):
@@ -71,6 +78,13 @@ def dashboard_image():
         yy = 535 + i * 48
         for x, value in zip([862, 1110, 1225], row):
             d.text((x, yy), value, fill=(55, 55, 55), font=font(14))
+        d.rounded_rectangle((1435, yy - 3, 1480, yy + 22), 4, fill=(246, 194, 62))
+        d.text((1445, yy + 2), "Edit", fill=(55, 55, 55), font=font(11, True))
+    d.text((862, 690), "Block controls", fill=HOST_BLUE, font=font(14, True))
+    for x, label, color in [(980, "Publish", (46, 89, 217)), (1075, "View", (108, 117, 125)), (1155, "Edit", (46, 89, 217))]:
+        d.rounded_rectangle((x, 686, x + 72, 714), 4, fill=color)
+        d.text((x + 12, 692), label, fill="white", font=font(12, True))
+    d.text((1245, 690), "hosts-block.txt", fill=GRAY, font=font(12))
     d.rounded_rectangle((842, 730, 1548, 875), 8, fill=(248, 249, 252), outline=HOST_BLUE, width=2)
     d.text((862, 745), "Next Step: Run Ansible Playbooks", fill=HOST_BLUE, font=font(18, True))
     d.text((862, 780), "As user ansible, run in order:", fill=(55, 55, 55), font=font(14))
