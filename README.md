@@ -72,7 +72,7 @@ kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,*
 mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2-tsand-org
 ```
 
-The `authorized-host` value may be `*` to represent all machine-groups, or a specific machine-group from `hosts.csv`.
+The `authorized-host` value may be `none` to keep the user out of all machine-groups, `*` to represent all machine-groups, or a specific machine-group from `hosts.csv`. Host names are matched case-insensitively with periods and hyphens treated equivalently, so `tom4.tsand.org` matches `tom4-tsand-org`. Selecting **None** removes the user from every `hosts.csv` member list.
 
 When adding a user, the form defaults UID and GID to one higher than the highest numeric value currently assigned in `users.csv`. If either value is omitted from the submitted request, `index.php` applies the same calculation server-side. Editing an existing user preserves its current UID and GID unless they are changed explicitly.
 

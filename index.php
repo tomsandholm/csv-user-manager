@@ -219,6 +219,11 @@ function next_host_group_id($rows) {
     return (string)($highest + 1);
 }
 
+// Normalize DNS-style host names and machine-group names for comparisons.
+function normalize_machine_group($value) {
+    return strtolower(str_replace('.', '-', trim($value)));
+}
+
 // Update only the host memberships affected by one user's assignment change.
 function sync_user_host_members($csv_hosts, $username, $old_auth_host = '', $new_auth_host = '', $old_username = '') {
     $hosts = read_csv($csv_hosts, 3);
@@ -226,20 +231,27 @@ function sync_user_host_members($csv_hosts, $username, $old_auth_host = '', $new
     $old_username = trim($old_username) !== '' ? trim($old_username) : $username;
     $old_auth_host = trim($old_auth_host);
     $new_auth_host = trim($new_auth_host);
+    $old_auth_group = normalize_machine_group($old_auth_host);
+    $new_auth_group = normalize_machine_group($new_auth_host);
     if ($username === '') {
         return false;
     }
-    $assignment_changed = $old_username !== $username || $old_auth_host !== $new_auth_host;
+    $assignment_changed = $old_username !== $username || $old_auth_group !== $new_auth_group;
 
     foreach ($hosts as $idx => $h) {
         if (strtolower(trim($h[0] ?? '')) === 'machine-group' || empty(trim($h[0] ?? ''))) continue;
         $machine_group = trim($h[0]);
+        $normalized_machine_group = normalize_machine_group($machine_group);
 
         $members = array_values(array_filter(array_map('trim', explode(',', (string)($h[2] ?? ''))), function ($member) {
             return $member !== '';
         }));
-        $remove_user = $assignment_changed && ($old_auth_host === '*' || ($old_auth_host !== '' && $old_auth_host === $machine_group));
-        $add_user = $assignment_changed && ($new_auth_host === '*' || ($new_auth_host !== '' && $new_auth_host === $machine_group));
+        $remove_user = $assignment_changed && (
+            $new_auth_group === 'none' ||
+            $old_auth_group === '*' ||
+            ($old_auth_group !== '' && $old_auth_group !== 'none' && $old_auth_group === $normalized_machine_group)
+        );
+        $add_user = $assignment_changed && ($new_auth_group === '*' || ($new_auth_group !== '' && $new_auth_group !== 'none' && $new_auth_group === $normalized_machine_group));
 
         if ($remove_user) {
             $members = array_values(array_filter($members, function ($member) use ($old_username) {
@@ -252,6 +264,22 @@ function sync_user_host_members($csv_hosts, $username, $old_auth_host = '', $new
         $hosts[$idx][2] = implode(',', $members);
     }
 
+    return write_csv($csv_hosts, $hosts);
+}
+
+// Remove a deleted user from every host member list, including preserved manual memberships.
+function remove_user_from_host_members($csv_hosts, $username) {
+    $username = trim($username);
+    if ($username === '') {
+        return false;
+    }
+    $hosts = read_csv($csv_hosts, 3);
+    foreach ($hosts as $idx => $host) {
+        $members = array_values(array_filter(array_map('trim', explode(',', (string)($host[2] ?? ''))), function ($member) use ($username) {
+            return $member !== '' && $member !== $username;
+        }));
+        $hosts[$idx][2] = implode(',', $members);
+    }
     return write_csv($csv_hosts, $hosts);
 }
 
@@ -364,7 +392,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['login_submit'])) {
             $deleted_user = $current_data[$row_index] ?? [];
             unset($current_data[$row_index]); $current_data = array_values($current_data);
             if (write_csv($csv_users, $current_data)) {
-                sync_user_host_members($csv_hosts, $deleted_user[0] ?? '', $deleted_user[6] ?? '');
+                remove_user_from_host_members($csv_hosts, $deleted_user[0] ?? '');
                 $message = "<div class='alert' style='color:#155724; background:#d4edda;'>User deleted and hosts synced.</div>";
             }
         } 
