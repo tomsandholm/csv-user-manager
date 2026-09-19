@@ -92,6 +92,7 @@
                             <label>Authorized Host</label>
                             <select name="authorized-host" required>
                                 <option value="">-- Select Host --</option>
+                                <option value="none" <?php echo (isset($edit_user) && strtolower(trim($edit_user[6])) === 'none') || (isset($edit_user) && trim($edit_user[6]) === '') ? 'selected' : ''; ?>>None</option>
                                 <option value="*" <?php echo (isset($edit_user) && trim($edit_user[6]) === '*') ? 'selected' : ''; ?>>* (All Hosts)</option>
                                 <?php foreach ($hosts as $h): ?>
                                     <?php 
