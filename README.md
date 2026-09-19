@@ -276,8 +276,15 @@ The playbook manages only the combined section between these markers and
 leaves all other `/etc/group` entries unchanged:
 
 ```text
+root:x:0:
+sudo:x:27:
 # BEGIN CSV User Manager managed groups
+tom1-tsand-org:x:5000:ansible,sudo,tsandholm
+tom2-tsand-org:x:5001:ansible,sudo,mary,mikey,tsandholm
+tsandholm:x:3000:
+mary:x:3002:
 # END CSV User Manager managed groups
+users:x:100:
 ```
 
 `update-user-block.yml` similarly writes the current user block when run
@@ -286,9 +293,19 @@ group first, then replaces only the managed section between these markers in
 `/etc/passwd`:
 
 ```text
+root:x:0:0:root:/root:/bin/bash
+ansible:x:1000:1000:Ansible:/home/ansible:/bin/bash
 # BEGIN CSV User Manager managed users
+tsandholm:x:3000:3000:tom.sandholm@gmail.com:/share/home/tsandholm:/bin/bash
+mary:x:3002:3002:tom.sandholm@gmail.com:/share/home/mary:/bin/bash
 # END CSV User Manager managed users
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
 ```
+
+After the playbooks run, the managed blocks appear alongside the host's
+existing system entries; they do not replace the complete `/etc/group` or
+`/etc/passwd` files. The marker lines identify the sections maintained by
+this project, so entries outside the markers remain unchanged on later runs.
 
 The user playbook can also be run manually:
 
