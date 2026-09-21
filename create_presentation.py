@@ -10,6 +10,7 @@ ROOT = Path(__file__).parent
 DOCS = ROOT / "docs"
 DOCS.mkdir(exist_ok=True)
 SCREENSHOT = DOCS / "dashboard-screenshot.png"
+KVM1 = DOCS / "kvm1-system.png"
 OUTPUT = DOCS / "csv-user-manager-presentation.pptx"
 
 NAVY = (33, 37, 41)
@@ -170,6 +171,10 @@ for i, (n, head, body) in enumerate(steps):
     add_textbox(slide, head, x+0.55, 2.38, 1.45, 0.35, 16, NAVY, True)
     add_textbox(slide, body, x+0.15, 2.95, 1.85, 0.65, 13, (65,65,65))
     if i < 4: add_textbox(slide, ">", x+2.23, 2.75, 0.3, 0.4, 22, GRAY, True, PP_ALIGN.CENTER)
+
+slide = prs.slides.add_slide(blank); title(slide, "Target infrastructure", "The managed `virt` hosts run as KVM guests on the kvm1 hypervisor, served over NFS.")
+bullets(slide, ["Bare-metal kvm1 = Dell PowerEdge R660 - 64 CPU, 499 GiB RAM.", "Four KVM guests: sv-quantum-lx25 - lx28 via libvirt.", "8 x SAS HDD behind PERC H755 -> RAID1 (OS) + RAID5 (data).", "ubuntu-vg: guest OS + /share/opt; vg_pool: guest disks + /usr/share/home.", "Guests mount NFSv4.2 exports and use bridging on br0."], x=0.55, y=1.5, w=4.0, size=13, gap=0.62)
+slide.shapes.add_picture(str(KVM1), Inches(4.71), Inches(1.35), width=Inches(8.27))
 
 slide = prs.slides.add_slide(blank); title(slide, "Ansible playbooks and order", "Run as user `ansible` from the controller; preview with `--check --diff` first. Allow SSH group setup runs once.")
 add_card(slide, 0.7, 1.35, 3.75, 3.8, "1. update-group-block.yml", "Target: remote `virt` hosts\n\nReads `hosts-block.txt` and updates the managed section of `/etc/group` with backups and privilege escalation.", HOST_BLUE)
