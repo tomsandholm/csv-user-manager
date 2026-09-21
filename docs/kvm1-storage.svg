@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 980" width="1440" height="980" role="img" aria-label="kvm1 storage block diagram from PERC RAID through LVM to NFS and KVM">
+  <rect width="1440" height="980" fill="#f4f5f7"/>
+
+  <text x="40" y="42" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="24" font-weight="700" fill="#111827">kvm1 storage</text>
+  <text x="40" y="68" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" fill="#4b5563">Dell PowerEdge R660 - sv-fwdev-1 - RAID to LVM to NFS</text>
+
+  <rect x="1188" y="28" width="14" height="14" rx="2" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="1210" y="40" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#111827">NFS export</text>
+  <rect x="1310" y="28" width="14" height="14" rx="2" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="1332" y="40" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#111827">KVM disks</text>
+
+  <rect x="28" y="88" width="1384" height="700" rx="10" fill="#ffffff" stroke="#111827" stroke-width="1.75"/>
+  <rect x="28" y="88" width="1384" height="56" rx="10" fill="#111827"/>
+  <rect x="28" y="128" width="1384" height="16" fill="#111827"/>
+  <text x="48" y="124" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="16" font-weight="700" fill="#ffffff">PERC H755 Front - SAS-12G - 8 x 2.18 TB SAS HDD - WriteBack - Optimal - no hot spare</text>
+
+  <rect x="48" y="164" width="664" height="600" rx="8" fill="#f8fafc" stroke="#374151" stroke-width="1.5"/>
+  <text x="68" y="198" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="18" font-weight="700" fill="#111827">VD238 RAID1</text>
+  <text x="68" y="222" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#4b5563">/dev/sda - 2.182 TB GPT - slots 252:0-1 - ubuntu-vg</text>
+
+  <rect x="68" y="242" width="624" height="72" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.25"/>
+  <text x="88" y="272" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sda1 - vfat 1G</text>
+  <text x="88" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#4b5563">/boot/efi - 6.4M used</text>
+
+  <rect x="68" y="326" width="624" height="72" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.25"/>
+  <text x="88" y="356" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sda2 - ext4 2G</text>
+  <text x="88" y="378" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#4b5563">/boot - 136M used</text>
+
+  <rect x="68" y="410" width="624" height="72" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.25"/>
+  <text x="88" y="440" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">ubuntu-lv - ext4 100G</text>
+  <text x="88" y="462" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#4b5563">/ - 16G used (18%) - swap.img 8G</text>
+
+  <rect x="68" y="494" width="624" height="72" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="88" y="524" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">lv_opt - xfs 150G</text>
+  <text x="88" y="546" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#1e3a8a">/share/opt - NFS - 80G used (53%)</text>
+
+  <rect x="68" y="578" width="624" height="72" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.25" stroke-dasharray="5 4"/>
+  <text x="88" y="608" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#374151">FREE 1.94 TiB</text>
+  <text x="88" y="630" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#6b7280">unallocated extents in ubuntu-vg</text>
+
+  <rect x="728" y="164" width="664" height="600" rx="8" fill="#f8fafc" stroke="#374151" stroke-width="1.5"/>
+  <text x="748" y="198" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="18" font-weight="700" fill="#111827">VD239 RAID5</text>
+  <text x="748" y="222" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#4b5563">/dev/sdb - 10.913 TB whole-disk PV - slots 252:2-7 - vg_pool</text>
+
+  <rect x="748" y="262" width="624" height="120" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="768" y="304" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">lv_libvirt - xfs 2.34T</text>
+  <text x="768" y="328" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#5b21b6">/var/lib/libvirt - KVM images/virt pools</text>
+  <text x="768" y="350" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#5b21b6">122G used (6%)</text>
+
+  <rect x="748" y="402" width="624" height="120" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="768" y="444" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">lv_share_home - xfs 4.09T</text>
+  <text x="768" y="468" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#1e3a8a">/usr/share/home - NFS - user quota 400G/450G</text>
+  <text x="768" y="490" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#1e3a8a">87G used (3%)</text>
+
+  <rect x="748" y="542" width="624" height="120" rx="6" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.25" stroke-dasharray="5 4"/>
+  <text x="768" y="588" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#374151">FREE 4.48 TiB</text>
+  <text x="768" y="612" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#6b7280">unallocated extents in vg_pool</text>
+
+  <rect x="28" y="808" width="1384" height="148" rx="10" fill="#ffffff" stroke="#2563eb" stroke-width="1.75"/>
+  <text x="48" y="840" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="16" font-weight="700" fill="#111827">NFS clients</text>
+  <text x="48" y="862" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" fill="#1e3a8a">/usr/share/home and /share/opt - * rw,sync,no_root_squash - 100.113.58.0/24</text>
+
+  <rect x="48" y="880" width="318" height="52" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="207" y="912" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" font-weight="700" fill="#111827">sv-quantum-lx25</text>
+
+  <rect x="386" y="880" width="318" height="52" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="545" y="912" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" font-weight="700" fill="#111827">sv-quantum-lx26</text>
+
+  <rect x="724" y="880" width="318" height="52" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="883" y="912" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" font-weight="700" fill="#111827">sv-quantum-lx27</text>
+
+  <rect x="1062" y="880" width="318" height="52" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="1221" y="912" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" font-weight="700" fill="#111827">sv-quantum-lx28</text>
+</svg>

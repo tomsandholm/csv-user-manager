@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1140" width="1600" height="1140" role="img" aria-label="kvm1 bare-metal Ubuntu 26.04 host with libvirt, NFS, ansible, cockpit, hardware RAID, br0, and VM NFS clients">
+  <rect width="1600" height="1140" fill="#f4f5f7"/>
+
+  <text x="36" y="40" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="24" font-weight="700" fill="#111827">kvm1 system</text>
+  <text x="36" y="64" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" fill="#4b5563">Bare-metal Dell PowerEdge R660 - Ubuntu 26.04.1 LTS - sv-fwdev-1</text>
+
+  <rect x="1128" y="22" width="14" height="14" rx="2" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="1148" y="34" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#111827">NFS</text>
+  <rect x="1198" y="22" width="14" height="14" rx="2" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="1218" y="34" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#111827">KVM / libvirt</text>
+  <rect x="1338" y="22" width="14" height="14" rx="2" fill="#cffafe" stroke="#0e7490" stroke-width="1.5"/>
+  <text x="1358" y="34" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#111827">br0 network</text>
+  <rect x="1488" y="22" width="14" height="14" rx="2" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.5"/>
+  <text x="1508" y="34" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#111827">storage</text>
+
+  <!-- HOST -->
+  <rect x="24" y="84" width="1552" height="548" rx="12" fill="#ffffff" stroke="#111827" stroke-width="1.75"/>
+  <rect x="24" y="84" width="1552" height="52" rx="12" fill="#111827"/>
+  <rect x="24" y="120" width="1552" height="16" fill="#111827"/>
+  <text x="44" y="118" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="16" font-weight="700" fill="#ffffff">kvm1 host  |  bare metal  |  Ubuntu 26.04.1  |  64 CPU  |  499 GiB RAM  |  100.113.58.224/24</text>
+
+  <!-- hardware raid -->
+  <rect x="44" y="156" width="1512" height="56" rx="8" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.25"/>
+  <text x="64" y="180" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="14" font-weight="700" fill="#111827">Hardware RAID - PERC H755 Front</text>
+  <text x="64" y="200" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#374151">VD238 RAID1 2.182 TB -&gt; /dev/sda (OS)     VD239 RAID5 10.913 TB -&gt; /dev/sdb (data)     8 x SAS HDD     WriteBack     Optimal     no hot spare</text>
+
+  <!-- services -->
+  <rect x="44" y="226" width="288" height="78" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="64" y="254" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">libvirtd</text>
+  <text x="64" y="276" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">enabled / active  |  QEMU/KVM</text>
+  <text x="64" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">cockpit-machines</text>
+
+  <rect x="348" y="226" width="288" height="78" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="368" y="254" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">nfs-server</text>
+  <text x="368" y="276" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">enabled / active  |  NFSv4.2 TCP 2049</text>
+  <text x="368" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">exports /share/opt and /usr/share/home</text>
+
+  <rect x="652" y="226" width="288" height="78" rx="8" fill="#ffffff" stroke="#6b7280" stroke-width="1.25"/>
+  <text x="672" y="254" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">ansible</text>
+  <text x="672" y="276" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#4b5563">core 2.20.1  |  /home/ansible</text>
+  <text x="672" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#4b5563">playbooks on host and guests</text>
+
+  <rect x="956" y="226" width="288" height="78" rx="8" fill="#ffffff" stroke="#6b7280" stroke-width="1.25"/>
+  <text x="976" y="254" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">cockpit</text>
+  <text x="976" y="276" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#4b5563">socket enabled  |  TCP 9090</text>
+  <text x="976" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#4b5563">storaged + machines + network</text>
+
+  <rect x="1260" y="226" width="296" height="78" rx="8" fill="#e5e7eb" stroke="#4b5563" stroke-width="1.25"/>
+  <text x="1280" y="254" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">lvm2</text>
+  <text x="1280" y="276" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#374151">ubuntu-vg on sda3</text>
+  <text x="1280" y="294" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#374151">vg_pool on sdb</text>
+
+  <!-- storage column -->
+  <rect x="44" y="320" width="744" height="288" rx="8" fill="#f8fafc" stroke="#4b5563" stroke-width="1.25"/>
+  <text x="64" y="348" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">LVM volumes</text>
+
+  <rect x="64" y="364" width="340" height="56" rx="6" fill="#ffffff" stroke="#6b7280" stroke-width="1.15"/>
+  <text x="80" y="386" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#111827">ubuntu-lv  100G ext4</text>
+  <text x="80" y="406" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#4b5563">/  host OS</text>
+
+  <rect x="420" y="364" width="348" height="56" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.35"/>
+  <text x="436" y="386" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#111827">lv_opt  150G xfs</text>
+  <text x="436" y="406" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">/share/opt  NFS export</text>
+
+  <rect x="64" y="432" width="340" height="56" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.35"/>
+  <text x="80" y="454" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#111827">lv_libvirt  2.34T xfs</text>
+  <text x="80" y="474" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">/var/lib/libvirt  VM disks</text>
+
+  <rect x="420" y="432" width="348" height="56" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.35"/>
+  <text x="436" y="454" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#111827">lv_share_home  4.09T xfs</text>
+  <text x="436" y="474" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">/usr/share/home  NFS + uquota</text>
+
+  <rect x="64" y="504" width="704" height="84" rx="6" fill="#eef2ff" stroke="#2563eb" stroke-width="1.35"/>
+  <text x="80" y="532" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#1e3a8a">NFS exports from kvm1</text>
+  <text x="80" y="552" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">100.113.58.224:/share/opt       -&gt;  guest /opt</text>
+  <text x="80" y="572" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#1e3a8a">100.113.58.224:/usr/share/home  -&gt;  guest /share/home</text>
+
+  <!-- network column -->
+  <rect x="804" y="320" width="752" height="288" rx="8" fill="#ecfeff" stroke="#0e7490" stroke-width="1.35"/>
+  <text x="824" y="348" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">bridge br0</text>
+  <text x="824" y="370" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#155e75">physical uplink eno8403 enslaved  |  100.113.58.224/24  |  gw 100.113.58.1</text>
+
+  <rect x="824" y="388" width="712" height="48" rx="6" fill="#cffafe" stroke="#0e7490" stroke-width="1.2"/>
+  <text x="840" y="418" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#111827">eno8403  UP  -&gt;  br0  -&gt;  LAN 100.113.58.0/24</text>
+
+  <rect x="824" y="448" width="168" height="64" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="908" y="474" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#111827">vnet8</text>
+  <text x="908" y="494" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">lx25 virtio</text>
+
+  <rect x="1004" y="448" width="168" height="64" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="1088" y="474" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#111827">vnet9</text>
+  <text x="1088" y="494" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">lx26 virtio</text>
+
+  <rect x="1184" y="448" width="168" height="64" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="1268" y="474" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#111827">vnet10</text>
+  <text x="1268" y="494" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">lx27 virtio</text>
+
+  <rect x="1364" y="448" width="172" height="64" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.2"/>
+  <text x="1450" y="474" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#111827">vnet11</text>
+  <text x="1450" y="494" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">lx28 virtio</text>
+
+  <rect x="824" y="528" width="712" height="60" rx="6" fill="#ffffff" stroke="#9ca3af" stroke-width="1.15"/>
+  <text x="840" y="554" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#374151">virbr0  192.168.122.1/24  (libvirt default NAT)</text>
+  <text x="840" y="574" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#6b7280">DOWN / unused by these guests - guests use br0 bridged networking</text>
+
+  <!-- connector label -->
+  <text x="800" y="656" text-anchor="middle" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="13" font-weight="700" fill="#0e7490">libvirtd guests on br0   +   NFSv4.2 mounts from kvm1</text>
+  <line x1="800" y1="664" x2="800" y2="688" stroke="#0e7490" stroke-width="2"/>
+  <polygon points="800,692 794,680 806,680" fill="#0e7490"/>
+
+  <!-- VM clients -->
+  <rect x="24" y="700" width="1552" height="416" rx="12" fill="#ffffff" stroke="#7c3aed" stroke-width="1.75"/>
+  <text x="44" y="730" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="16" font-weight="700" fill="#111827">VM clients  (QEMU/KVM, running)</text>
+  <text x="44" y="750" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">Each guest: 7 vCPU, 32 GiB RAM, virtio NIC on br0, disks on lv_libvirt, NFSv4.2 from 100.113.58.224</text>
+
+  <!-- lx25 -->
+  <rect x="44" y="768" width="368" height="324" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.35"/>
+  <text x="64" y="796" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sv-quantum-lx25</text>
+  <text x="64" y="816" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">100.113.58.226  |  vnet8 on br0</text>
+  <rect x="64" y="832" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="80" y="856" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /opt</text>
+  <text x="80" y="876" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/share/opt</text>
+  <rect x="64" y="914" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="80" y="938" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /share/home</text>
+  <text x="80" y="958" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/usr/share/home</text>
+  <text x="64" y="1014" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">fstab: nfs auto,nofail,_netdev</text>
+  <text x="64" y="1034" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">protocol NFSv4.2 / sec=sys</text>
+  <text x="64" y="1070" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">disks: rootfs + swap + data qcow2</text>
+
+  <!-- lx26 -->
+  <rect x="428" y="768" width="368" height="324" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.35"/>
+  <text x="448" y="796" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sv-quantum-lx26</text>
+  <text x="448" y="816" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">100.113.58.227  |  vnet9 on br0</text>
+  <rect x="448" y="832" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="464" y="856" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /opt</text>
+  <text x="464" y="876" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/share/opt</text>
+  <rect x="448" y="914" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="464" y="938" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /share/home</text>
+  <text x="464" y="958" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/usr/share/home</text>
+  <text x="448" y="1014" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">fstab: nfs auto,nofail,_netdev</text>
+  <text x="448" y="1034" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">protocol NFSv4.2 / sec=sys</text>
+  <text x="448" y="1070" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">disks: rootfs + swap + data qcow2</text>
+
+  <!-- lx27 -->
+  <rect x="812" y="768" width="368" height="324" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.35"/>
+  <text x="832" y="796" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sv-quantum-lx27</text>
+  <text x="832" y="816" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">100.113.58.236  |  vnet10 on br0</text>
+  <rect x="832" y="832" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="848" y="856" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /opt</text>
+  <text x="848" y="876" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/share/opt</text>
+  <rect x="832" y="914" width="328" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="848" y="938" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /share/home</text>
+  <text x="848" y="958" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/usr/share/home</text>
+  <text x="832" y="1014" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">fstab: nfs auto,nofail,_netdev</text>
+  <text x="832" y="1034" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">protocol NFSv4.2 / sec=sys</text>
+  <text x="832" y="1070" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">disks: rootfs + swap + data qcow2</text>
+
+  <!-- lx28 -->
+  <rect x="1196" y="768" width="360" height="324" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.35"/>
+  <text x="1216" y="796" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#111827">sv-quantum-lx28</text>
+  <text x="1216" y="816" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" fill="#5b21b6">100.113.58.237  |  vnet11 on br0</text>
+  <rect x="1216" y="832" width="320" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="1232" y="856" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /opt</text>
+  <text x="1232" y="876" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/share/opt</text>
+  <rect x="1216" y="914" width="320" height="70" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.25"/>
+  <text x="1232" y="938" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="12" font-weight="700" fill="#1e3a8a">NFS /share/home</text>
+  <text x="1232" y="958" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#1e3a8a">kvm1:/usr/share/home</text>
+  <text x="1216" y="1014" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">fstab: nfs auto,nofail,_netdev</text>
+  <text x="1216" y="1034" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#4b5563">protocol NFSv4.2 / sec=sys</text>
+  <text x="1216" y="1070" font-family="Liberation Sans, DejaVu Sans, sans-serif" font-size="11" fill="#5b21b6">disks: rootfs + swap + data qcow2</text>
+</svg>
