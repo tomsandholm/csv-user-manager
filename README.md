@@ -60,19 +60,19 @@ the session.
 Each row represents one user:
 
 ```text
-username,uid,gid,email,home-directory,public-key,authorized-host
+username,uid,gid,email,home-directory,public-key,allowed-hosts
 ```
 
 Example:
 
 ```csv
-username,uid,gid,email,home-directory,public-key,authorized-host
-tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,ssh-rsa AAA...,*
-kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,*
+username,uid,gid,email,home-directory,public-key,allowed-hosts
+tsandholm,3000,3000,tom.sandholm@gmail.com,/share/home/tsandholm,ssh-rsa AAA...,all
+kat,3001,3001,tom.sandholm@gmail.com,/share/home/kat,ssh-rsa AAA...,all
 mary,3002,3002,tom.sandholm@gmail.com,/share/home/mary,ssh-rsa AAA...,tom2-tsand-org
 ```
 
-The `authorized-host` value may be `none` to keep the user out of all machine-groups, `*` to represent all machine-groups, or a specific machine-group from `hosts.csv`. Host names are matched case-insensitively with periods and hyphens treated equivalently, so `tom4.tsand.org` matches `tom4-tsand-org`. Selecting **None** removes the user from every `hosts.csv` member list.
+The `allowed-hosts` value may be `none` to keep the user out of all machine-groups, `all` to represent all machine-groups, or a specific machine-group from `hosts.csv`. Host names are matched case-insensitively with periods and hyphens treated equivalently, so `tom4.tsand.org` matches `tom4-tsand-org`. Selecting **None** removes the user from every `hosts.csv` member list.
 
 When adding a user, the form defaults UID and GID to one higher than the highest numeric value currently assigned in `users.csv`. If either value is omitted from the submitted request, `index.php` applies the same calculation server-side. Editing an existing user preserves its current UID and GID unless they are changed explicitly.
 
@@ -220,7 +220,7 @@ That means members of `tom1-tsand-org` can log in to `tom1.tsand.org`, while
 members of another host group are not granted access there. The `ansible` and
 `sudo` groups remain listed so administrative access is retained. This is how
 the project controls which system a user can log in to: the user's
-`authorized-host` assignment determines host-group membership, and
+`allowed-hosts` assignment determines host-group membership, and
 `AllowGroups` enforces that membership at the SSH daemon.
 
 To revoke the machine-group's SSH access without removing administrative
